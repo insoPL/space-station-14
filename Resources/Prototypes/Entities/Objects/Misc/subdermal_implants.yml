@@ -310,7 +310,23 @@
       - Critical
       - Dead
     - type: Rattle
-
+    
+- type: entity
+  parent: BaseSubdermalImplant
+  id: MindBackupImplant
+  name: mind backup implant
+  description: This implant will allow cloning #TODO rewrite
+  categories: [ HideSpawnMenu ]
+  components:
+    - type: SubdermalImplant
+      permanent: true
+    - type: TriggerOnMobstateChange
+      mobState:
+      - Dead
+      preventSuicide: true
+    - type: Tag
+      tags:
+        - MindBackup
 # Sec and Command implants
 
 - type: entity
@@ -320,8 +336,8 @@
   description: This implant will ensure loyalty to Nanotrasen and prevent mind control devices.
   categories: [ HideSpawnMenu ]
   components:
-   - type: SubdermalImplant
-     permanent: true
-   - type: Tag
-     tags:
-       - MindShield
+    - type: SubdermalImplant
+      permanent: true
+    - type: Tag
+      tags:
+      - MindShield

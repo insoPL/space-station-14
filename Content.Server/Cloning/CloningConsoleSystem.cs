@@ -171,7 +171,7 @@ namespace Content.Server.Cloning
             if (mind.UserId.HasValue == false || mind.Session == null)
                 return;
 
-            if (_cloningSystem.TryCloning(cloningPodUid, body.Value, (mindId, mind), cloningPod, scannerComp.CloningFailChanceMultiplier))
+            if (_cloningSystem.TryLinkingCloneAndMindBackupImplant(cloningPodUid, body.Value, (mindId, mind), cloningPod, scannerComp.CloningFailChanceMultiplier))
                 _adminLogger.Add(LogType.Action, LogImpact.Medium, $"{ToPrettyString(uid)} successfully cloned {ToPrettyString(body.Value)}.");
         }
 
@@ -195,7 +195,7 @@ namespace Content.Server.Cloning
         }
         private CloningConsoleBoundUserInterfaceState GetUserInterfaceState(CloningConsoleComponent consoleComponent)
         {
-            ClonerStatus clonerStatus = ClonerStatus.Ready;
+            ClonerStatus clonerStatus = ClonerStatus.ReadyToMakeClone;
 
             // genetic scanner info
             string scanBodyInfo = Loc.GetString("generic-unknown");
@@ -213,18 +213,17 @@ namespace Content.Server.Cloning
                 {
                     scanBodyInfo = MetaData(scanBody.Value).EntityName;
 
-                    if (!_mobStateSystem.IsDead(scanBody.Value))
+                    if (_mobStateSystem.IsDead(scanBody.Value)
+                        || !_mindSystem.TryGetMind(scanBody.Value, out _, out var mind)
+                        || mind.UserId == null
+                        || !_playerManager.TryGetSessionById(mind.UserId.Value, out _)
+                        )
                     {
-                        clonerStatus = ClonerStatus.ScannerOccupantAlive;
+                        clonerStatus = ClonerStatus.ScannerOccupantInvalid;
                     }
                     else
                     {
-                        if (!_mindSystem.TryGetMind(scanBody.Value, out _, out var mind) ||
-                            mind.UserId == null ||
-                            !_playerManager.TryGetSessionById(mind.UserId.Value, out _))
-                        {
-                            clonerStatus = ClonerStatus.NoMindDetected;
-                        }
+                        clonerStatus = ClonerStatus.ReadyToMakeClone;
                     }
                 }
             }
@@ -241,11 +240,11 @@ namespace Content.Server.Cloning
                 EntityUid? cloneBody = clonePod.BodyContainer.ContainedEntity;
 
                 clonerMindPresent = clonePod.Status == CloningPodStatus.Cloning;
-                if (HasComp<ActiveCloningPodComponent>(consoleComponent.CloningPod))
+                if (HasComp<CloneIsGrowingComponent>(consoleComponent.CloningPod))
                 {
                     if (cloneBody != null)
                         cloneBodyInfo = Identity.Name(cloneBody.Value, EntityManager);
-                    clonerStatus = ClonerStatus.ClonerOccupied;
+                    clonerStatus = ClonerStatus.CloneReady;
                 }
             }
             else

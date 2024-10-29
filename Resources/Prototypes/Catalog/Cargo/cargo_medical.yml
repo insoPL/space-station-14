@@ -117,6 +117,16 @@
   cost: 3000
   category: cargoproduct-category-name-medical
   group: market
+  
+- type: cargoProduct
+  id: MedicalMindBackupImplants
+  icon:
+    sprite: Objects/Specific/Medical/implanter.rsi
+    state: implanter0
+  product: CrateMindBackupImplants
+  cost: 3000
+  category: cargoproduct-category-name-medical
+  group: market
 
 - type: cargoProduct
   id: ChemistryP

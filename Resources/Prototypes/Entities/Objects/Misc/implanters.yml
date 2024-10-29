@@ -245,6 +245,14 @@
   - type: Implanter
     implant: DeathAcidifierImplant
 
+- type: entity
+  id: MindBackupImplanter
+  suffix: mindbackup
+  parent: BaseImplantOnlyImplanter
+  components:
+    - type: Implanter
+      implant: MindBackupImplant
+    
 # Security and Command implanters
 
 - type: entity

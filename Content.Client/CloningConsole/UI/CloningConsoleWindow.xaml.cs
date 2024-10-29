@@ -34,32 +34,29 @@ namespace Content.Client.CloningConsole.UI
                 GeneticScannerContents.Visible = true;
                 GeneticScannerFar.Visible = false;
                 GeneticScannerMissing.Visible = false;
-                CloneButton.Disabled = state.CloningStatus != ClonerStatus.Ready;
+                CloneButton.Disabled = state.CloningStatus != ClonerStatus.ReadyToMakeClone;
 
                 switch (state.CloningStatus)
-                    {
-                        case ClonerStatus.NoClonerDetected:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-no-cloner"));
-                            break;
-                        case ClonerStatus.Ready:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-ready"));
-                            break;
-                        case ClonerStatus.ClonerOccupied:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-occupied"));
-                            break;
-                        case ClonerStatus.ScannerEmpty:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-empty"));
-                            break;
-                        case ClonerStatus.ScannerOccupantAlive:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-scanner-occupant-alive"));
-                            break;
-                        case ClonerStatus.OccupantMetaphyiscal:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-already-alive"));
-                            break;
-                        case ClonerStatus.NoMindDetected:
-                            CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-no-mind"));
-                            break;
-                    }
+                {
+                    case ClonerStatus.ScannerEmpty:
+                        CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-empty"));
+                        break;
+                    case ClonerStatus.ReadyToMakeClone:
+                        CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-ready-to-make-clone"));
+                        break;
+                    case ClonerStatus.CloneReady:
+                        CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-clone-ready"));
+                        break;
+                    case ClonerStatus.NoMindDetected:
+                        CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-mo-mind-detected"));
+                        break;
+                    case ClonerStatus.ScannerOccupantInvalid:
+                        CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-occupant-invalid"));
+                        break;
+                    case ClonerStatus.NoClonerDetected:
+                        CloningActivity.Text = (Loc.GetString("cloning-console-component-msg-no-cloner"));
+                        break;
+                }
                 // Set label depending on if scanner is occupied or not.
                 ScannerInfoLabel.SetMarkup(state.ScannerBodyInfo != null ?
                     Loc.GetString("cloning-console-window-scanner-id", ("scannerOccupantName", state.ScannerBodyInfo)) :

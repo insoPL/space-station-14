@@ -7,14 +7,12 @@ namespace Content.Server.Cloning
 {
     public sealed class AcceptCloningEui : BaseEui
     {
-        private readonly EntityUid _mindId;
-        private readonly MindComponent _mind;
+        private readonly EntityUid _entityId;
         private readonly CloningSystem _cloningSystem;
 
-        public AcceptCloningEui(EntityUid mindId, MindComponent mind, CloningSystem cloningSys)
+        public AcceptCloningEui(EntityUid targetUid, CloningSystem cloningSys)
         {
-            _mindId = mindId;
-            _mind = mind;
+            _entityId = targetUid;
             _cloningSystem = cloningSys;
         }
 
@@ -29,7 +27,7 @@ namespace Content.Server.Cloning
                 return;
             }
 
-            _cloningSystem.TransferMindToClone(_mindId, _mind);
+            _cloningSystem.TransferMindToClone(_entityId);
             Close();
         }
     }

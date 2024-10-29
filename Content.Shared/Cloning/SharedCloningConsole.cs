@@ -1,4 +1,4 @@
-﻿using Robust.Shared.Serialization;
+using Robust.Shared.Serialization;
 
 namespace Content.Shared.Cloning.CloningConsole
 {
@@ -29,13 +29,12 @@ namespace Content.Shared.Cloning.CloningConsole
     [Serializable, NetSerializable]
     public enum ClonerStatus : byte
     {
-        Ready,
+        ReadyToMakeClone,
         ScannerEmpty,
-        ScannerOccupantAlive,
-        OccupantMetaphyiscal,
-        ClonerOccupied,
-        NoClonerDetected,
-        NoMindDetected
+        ScannerOccupantInvalid,
+        CloneReady,
+        NoMindDetected,
+        NoClonerDetected
     }
 
     [Serializable, NetSerializable]

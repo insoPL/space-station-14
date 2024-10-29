@@ -59,7 +59,6 @@ namespace Content.Server.Zombies
 
             SubscribeLocalEvent<ZombieComponent, MeleeHitEvent>(OnMeleeHit);
             SubscribeLocalEvent<ZombieComponent, MobStateChangedEvent>(OnMobState);
-            SubscribeLocalEvent<ZombieComponent, CloningEvent>(OnZombieCloning);
             SubscribeLocalEvent<ZombieComponent, TryingToSleepEvent>(OnSleepAttempt);
             SubscribeLocalEvent<ZombieComponent, GetCharactedDeadIcEvent>(OnGetCharacterDeadIC);
 
@@ -284,12 +283,6 @@ namespace Content.Server.Zombies
 
             _nameMod.RefreshNameModifiers(target);
             return true;
-        }
-
-        private void OnZombieCloning(EntityUid uid, ZombieComponent zombiecomp, ref CloningEvent args)
-        {
-            if (UnZombify(args.Source, args.Target, zombiecomp))
-                args.NameHandled = true;
         }
     }
 }

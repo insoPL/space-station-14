@@ -54,6 +54,17 @@
         amount: 3
 
 - type: entity
+  id: CrateMindUploadImplants
+  parent: CrateMedical
+  name: mind upload implant crate
+  description: Crate filled with 3 MindUpload implants.
+  components:
+  - type: StorageFill
+    contents:
+      - id: MindUploadImplanter
+        amount: 3
+
+- type: entity
   id: CrateMedicalSurgery
   parent: CrateSurgery
   name: surgical supplies crate

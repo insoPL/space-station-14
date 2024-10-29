@@ -19,24 +19,20 @@ public sealed class MindShieldSystem : EntitySystem
     [Dependency] private readonly IAdminLogManager _adminLogManager = default!;
     [Dependency] private readonly RoleSystem _roleSystem = default!;
     [Dependency] private readonly MindSystem _mindSystem = default!;
-    [Dependency] private readonly TagSystem _tag = default!;
     [Dependency] private readonly PopupSystem _popupSystem = default!;
-
-    [ValidatePrototypeId<TagPrototype>]
-    public const string MindShieldTag = "MindShield";
 
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<SubdermalImplantComponent, ImplantImplantedEvent>(ImplantCheck);
+        SubscribeLocalEvent<SubdermalImplantComponent, MindShieldImplantImplantedEvent>(ImplantCheck);
     }
 
     /// <summary>
     /// Checks if the implant was a mindshield or not
     /// </summary>
-    public void ImplantCheck(EntityUid uid, SubdermalImplantComponent comp, ref ImplantImplantedEvent ev)
+    public void ImplantCheck(EntityUid uid, SubdermalImplantComponent comp, ref MindShieldImplantImplantedEvent ev)
     {
-        if (_tag.HasTag(ev.Implant, MindShieldTag) && ev.Implanted != null)
+        if (ev.Implanted != null)
         {
             EnsureComp<MindShieldComponent>(ev.Implanted.Value);
             MindShieldRemovalCheck(ev.Implanted.Value, ev.Implant);

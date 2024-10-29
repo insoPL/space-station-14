@@ -20,7 +20,7 @@ public sealed partial class CloningPodComponent : Component
     /// How long the cloning has been going on for.
     /// </summary>
     [ViewVariables]
-    public float CloningProgress = 0;
+    public float BodyScanProgress = 0;
 
     [ViewVariables]
     public int UsedBiomass = 70;
@@ -38,7 +38,7 @@ public sealed partial class CloningPodComponent : Component
     /// The current amount of time it takes to clone a body
     /// </summary>
     [DataField, ViewVariables(VVAccess.ReadWrite)]
-    public float CloningTime = 30f;
+    public float BodyScanTime = 30f;
 
     /// <summary>
     /// The mob to spawn on emag
@@ -82,22 +82,4 @@ public enum CloningPodStatus : byte
     Cloning,
     Gore,
     NoMind
-}
-
-/// <summary>
-/// Raised after a new mob got spawned when cloning a humanoid
-/// </summary>
-[ByRefEvent]
-public struct CloningEvent
-{
-    public bool NameHandled = false;
-
-    public readonly EntityUid Source;
-    public readonly EntityUid Target;
-
-    public CloningEvent(EntityUid source, EntityUid target)
-    {
-        Source = source;
-        Target = target;
-    }
 }

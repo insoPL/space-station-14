@@ -949,6 +949,9 @@
   id: MindShield
 
 - type: Tag
+  id: MindUploader
+
+- type: Tag
   id: MindTransferTarget
 
 - type: Tag
