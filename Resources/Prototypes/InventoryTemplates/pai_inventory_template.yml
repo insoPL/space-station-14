@@ -11,3 +11,11 @@
     whitelist:
       tags:
         - PaiWearable
+  - name: pocket1
+    slotTexture: pocket
+    fullTextureName: template_small
+    slotFlags: POCKET
+    stripTime: 1
+    uiWindowPos: 0,2
+    strippingWindowPos: 0,1
+    displayName: Pocket 1

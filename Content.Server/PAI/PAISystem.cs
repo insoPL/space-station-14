@@ -8,7 +8,10 @@ using Content.Shared.PAI;
 using Content.Shared.Popups;
 using Robust.Shared.Random;
 using System.Text;
-using Robust.Shared.Player;
+using Content.Server.Radio.Components;
+using Content.Shared.Inventory.Events;
+using Content.Shared.Radio.Components;
+using Content.Shared.Inventory;
 
 namespace Content.Server.PAI;
 
@@ -33,6 +36,67 @@ public sealed class PAISystem : SharedPAISystem
         SubscribeLocalEvent<PAIComponent, MindAddedMessage>(OnMindAdded);
         SubscribeLocalEvent<PAIComponent, MindRemovedMessage>(OnMindRemoved);
         SubscribeLocalEvent<PAIComponent, BeingMicrowavedEvent>(OnMicrowaved);
+        SubscribeLocalEvent<PAIComponent, DidEquipEvent>(OnDidEquip);
+        SubscribeLocalEvent<PAIComponent, DidUnequipEvent>(OnDidUnEquip);
+    }
+
+    private void OnDidEquip(Entity<PAIComponent> ent, ref DidEquipEvent args) => UpdateRadioChannels(args.Equipee);
+
+    private void OnDidUnEquip(Entity<PAIComponent> ent, ref DidUnequipEvent args) => UpdateRadioChannels(args.Equipee);
+
+    private void UpdateRadioChannels(EntityUid uid)
+    {
+        TryComp(uid, out InventoryComponent? inventory);
+        if (inventory == null) return;
+
+        HashSet<String> channelsFromInventory = new HashSet<string>();
+
+        foreach (var item in inventory.Containers)
+        {
+            TryComp(item.ContainedEntity, out EncryptionKeyComponent? insertedKey);
+            if (insertedKey == null) continue;
+
+            channelsFromInventory.UnionWith(insertedKey.Channels);
+        }
+
+        EnsureComp(uid, out IntrinsicRadioTransmitterComponent intrinsicRadio);
+        var intrinsicRadioChannels = intrinsicRadio?.Channels;
+        if (intrinsicRadioChannels == null) intrinsicRadioChannels = new HashSet<string>();
+
+        HashSet<String> intrRadioChannelsFromPrototype = new HashSet<string>();
+        var intrRadioProtoObj = Prototype(uid)?.Components["IntrinsicRadioTransmitter"]?.Component;
+        if (intrRadioProtoObj != null)
+        {
+            IntrinsicRadioTransmitterComponent? intrRadioComponentPrototype = intrRadioProtoObj as IntrinsicRadioTransmitterComponent;
+            if (intrRadioComponentPrototype != null)
+            {
+                intrRadioChannelsFromPrototype = intrRadioComponentPrototype.Channels;
+            }
+        }
+
+        intrinsicRadioChannels.Clear();
+        intrinsicRadioChannels.UnionWith(channelsFromInventory);
+        intrinsicRadioChannels.UnionWith(intrRadioChannelsFromPrototype);
+
+
+        EnsureComp(uid, out ActiveRadioComponent activeRadioComponent);
+        var activeRadioChannels = activeRadioComponent?.Channels;
+        if (activeRadioChannels == null) activeRadioChannels = new HashSet<string>();
+
+        HashSet<String> activeRadioChannelsFromPrototype = new HashSet<string>();
+        var activeRadioProtoObj = Prototype(uid)?.Components["ActiveRadio"]?.Component;
+        if (activeRadioProtoObj != null)
+        {
+            ActiveRadioComponent? activeRadioComponentPrototype = activeRadioProtoObj as ActiveRadioComponent;
+            if (activeRadioComponentPrototype != null)
+            {
+                activeRadioChannelsFromPrototype = activeRadioComponentPrototype.Channels;
+            }
+        }
+
+        activeRadioChannels.Clear();
+        activeRadioChannels.UnionWith(channelsFromInventory);
+        activeRadioChannels.UnionWith(activeRadioChannelsFromPrototype);
     }
 
     private void OnUseInHand(EntityUid uid, PAIComponent component, UseInHandEvent args)
