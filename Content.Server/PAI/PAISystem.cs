@@ -12,6 +12,13 @@ using Content.Server.Radio.Components;
 using Content.Shared.Inventory.Events;
 using Content.Shared.Radio.Components;
 using Content.Shared.Inventory;
+using Content.Server.Radio;
+using Content.Shared.Storage.Components;
+using Robust.Shared.Containers;
+using Robust.Shared.Map.Components;
+using JetBrains.FormatRipper.Elf;
+using static Content.Shared.Inventory.InventorySystem;
+using Content.Server.Inventory;
 
 namespace Content.Server.PAI;
 
@@ -22,6 +29,8 @@ public sealed class PAISystem : SharedPAISystem
     [Dependency] private readonly MetaDataSystem _metaData = default!;
     [Dependency] private readonly SharedPopupSystem _popup = default!;
     [Dependency] private readonly ToggleableGhostRoleSystem _toggleableGhostRole = default!;
+    [Dependency] private readonly InventorySystem _inventory = default!;
+    [Dependency] private readonly SharedContainerSystem _container = default!;
 
     /// <summary>
     /// Possible symbols that can be part of a scrambled pai's name.
@@ -38,15 +47,69 @@ public sealed class PAISystem : SharedPAISystem
         SubscribeLocalEvent<PAIComponent, BeingMicrowavedEvent>(OnMicrowaved);
         SubscribeLocalEvent<PAIComponent, DidEquipEvent>(OnDidEquip);
         SubscribeLocalEvent<PAIComponent, DidUnequipEvent>(OnDidUnEquip);
+        SubscribeLocalEvent<PAIComponent, RadioSendAttemptEvent>(OnRadioSendAttempt);
     }
 
+
+    private void OnRadioSendAttempt(Entity<PAIComponent> entent, ref RadioSendAttemptEvent args)
+    {
+        if (args == null)
+        {
+            return;
+        }
+        EntityUid paiUid = args.RadioSource;
+        TryComp(paiUid, out TransformComponent? transfor);
+        TryComp(transfor?.ParentUid, out SecretStashComponent? stash);
+        TryComp(transfor?.ParentUid, out MapComponent? map);
+        TryComp(transfor?.ParentUid, out MapGridComponent? mapGrid);
+
+        if (stash != null || map != null || mapGrid != null)//IsEntityInContainer
+            return;
+
+        args.Cancelled = true;
+        return;
+    }
     private void OnDidEquip(Entity<PAIComponent> ent, ref DidEquipEvent args) => UpdateRadioChannels(args.Equipee);
 
     private void OnDidUnEquip(Entity<PAIComponent> ent, ref DidUnequipEvent args) => UpdateRadioChannels(args.Equipee);
 
-    private void UpdateRadioChannels(EntityUid uid)
+
+    public void UpdateRadioChannels(EntityUid uid)
     {
-        TryComp(uid, out InventoryComponent? inventory);
+        TryComp(uid, out PAIComponent? pAIComponent);
+        if (pAIComponent == null) return;
+
+        //_inventory.GetHandOrInventoryEntities(uid)
+        _container.TryGetContainingContainer((uid, null), out var pdaContainer);//add pda check
+        if (pdaContainer == null) return;
+        _container.TryGetContainingContainer((pdaContainer.Owner, null), out var playerContainer);
+        if (playerContainer == null) return;
+
+        //Add check its inside pda.
+        TryComp(playerContainer.Owner, out InventoryComponent? playerInventory);
+        if(playerInventory == null) return;
+
+        
+        _inventory.TryGetSlot().
+
+        foreach (ContainerSlot containerSlot in playerInventory.Containers)
+            if (containerSlot.ID == "ears")
+            {
+                var headphones = containerSlot.ContainedEntity;
+                break;
+            }
+        if (headphones == null) return;
+
+        //add dcheck if its headphones frl
+        TryComp(headphones, out ContainerManagerComponent? headphonesInventory);
+        Container? container = headphonesInventory.Containers["key_slots"];
+        foreach (EntityUid key in container)
+        {
+            key
+        }
+
+
+            TryComp(uid, out InventoryComponent? inventory);
         if (inventory == null) return;
 
         HashSet<String> channelsFromInventory = new HashSet<string>();
