@@ -1,6 +1,6 @@
 - type: entity
   id: IV_Drip
-  parent: BaseStructure
+  parent: [ BaseMachine, SmallConstructibleMachine ]
   name:  IV Drip
   description: A machine with drip.
   components:
@@ -8,29 +8,36 @@
     sprite: Structures/Machines/Medical/iv_drip.rsi
     state: iv_drip
     noRot: true
+    layers:
+      - state: "iv_drip"
+        map: [ "iv_drip" ]
+      - state: bagSlot1
+        map: ["enum.SolutionContainerLayers.Fill"]
+        visible: false
   - type: Appearance
   - type: GenericVisualizer
     visuals:
-      enum.ReagentGrinderVisualState.BeakerAttached:
-        grinder:
-          True: {state: "juicer1"}
-          False: {state: "juicer0"}
+      enum.IvDripVisualState.BagAttached:
+        iv_drip:
+          True: {state: "iv_drip_with_bag"}
+          False: {state: "iv_drip"}
+  - type: SolutionContainerVisuals
+    maxFillLevels: 4
+    insertedItemSlotID: bagSlot
+    fillBaseName: bagSlot
   - type: Physics
   - type: Construction
     graph: bed
     node: bed
-  - type: Damageable
-    damageContainer: Inorganic
-    damageModifierSet: Metallic
   - type: ItemSlots
     slots:
-      beakerSlot:
+      bagSlot:
         whitelist:
           components:
           - FitsInDispenser
   - type: ContainerContainer
     containers:
-      beakerSlot: !type:ContainerSlot
+      bagSlot: !type:ContainerSlot
       inputContainer: !type:Container
   - type: Fixtures
     fixtures:
@@ -40,21 +47,7 @@
           radius: 0.25
         density: 50
         mask:
-        - TableMask
+        - MachineMask
         layer:
-        - TableLayer
-  - type: Destructible
-    thresholds:
-    - trigger:
-        !type:DamageTrigger
-        damage: 75
-      behaviors:
-      - !type:DoActsBehavior
-        acts: ["Destruction"]
-      - !type:SpawnEntitiesBehavior
-        spawn:
-          SheetSteel1:
-            min: 1
-            max: 2
-  - type: Anchorable
-  - type: Pullable
+        - MachineLayer
+  - type: IvDrip
