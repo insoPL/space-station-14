@@ -1,13 +1,13 @@
-using Content.Server.Kitchen.Components;
 using Content.Server.Medical.Components;
 using Content.Shared.Chemistry;
 using Content.Shared.Containers.ItemSlots;
-using Content.Shared.Kitchen;
+using Content.Shared.DragDrop;
 using Content.Shared.Medical;
 using JetBrains.Annotations;
 using Robust.Shared.Containers;
+using Content.Shared.Medical.IvDrip;
 
-namespace Content.Server.Medical
+namespace Content.Server.Medical.IvDrip
 {
     [UsedImplicitly]
     internal sealed class IvDripSystem : EntitySystem
@@ -20,8 +20,14 @@ namespace Content.Server.Medical
         {
             base.Initialize();
 
+            SubscribeLocalEvent<IvDripComponent, DragDropTargetEvent>(HandleDragDropOn);
             SubscribeLocalEvent<IvDripComponent, EntInsertedIntoContainerMessage>(OnContainerModified);
             SubscribeLocalEvent<IvDripComponent, EntRemovedFromContainerMessage>(OnContainerModified);
+        }
+
+        private void HandleDragDropOn(Entity<IvDripComponent> ent, ref DragDropTargetEvent args)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnContainerModified(EntityUid uid, IvDripComponent ivDripComponent, ContainerModifiedMessage args)
