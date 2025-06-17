@@ -11,255 +11,55 @@
       "name": "full"
     },
     {
-      "name": "plasma0",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma"
     },
     {
-      "name": "plasma1",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma0"
     },
     {
-      "name": "plasma2",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma1"
     },
     {
-      "name": "plasma3",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma2"
     },
     {
-      "name": "plasma4",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma3"
     },
     {
-      "name": "plasma5",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma4"
     },
     {
-      "name": "plasma6",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma5"
     },
     {
-      "name": "plasma7",
-      "directions": 4,
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ],
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma6"
     },
     {
-      "name": "plasma",
-      "delays": [
-        [
-          2,
-          2,
-          2,
-          2
-        ]
-      ]
+      "name": "plasma7"
+    },
+    {
+      "name": "plasma8"
+    },
+    {
+      "name": "plasma9"
+    },
+    {
+      "name": "plasma10"
+    },
+    {
+      "name": "plasma11"
+    },
+    {
+      "name": "plasma12"
+    },
+    {
+      "name": "plasma13"
+    },
+    {
+      "name": "plasma14"
+    },
+    {
+      "name": "plasma15"
     }
   ]
 }

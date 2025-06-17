@@ -36,7 +36,10 @@
     state: full
   - type: IconSmooth
     key: floor
+    additionalKeys:
+    - walls
     base: plasma
+    mode: CardinalFlags
   - type: Physics
     bodyType: Static
   - type: Fixtures
