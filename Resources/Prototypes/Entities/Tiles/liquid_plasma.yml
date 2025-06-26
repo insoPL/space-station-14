@@ -42,6 +42,7 @@
     mode: CardinalFlags
   - type: Physics
     bodyType: Static
+  - type: BodyOfWaterEffect
   - type: Fixtures
     fixtures:
       fix1:

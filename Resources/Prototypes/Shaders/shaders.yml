@@ -54,6 +54,11 @@
   path: "/Textures/Shaders/noir.swsl"
 
 - type: shader
+  id: LakeEffect
+  kind: source
+  path: "/Textures/Shaders/lake_effect.swsl"
+
+- type: shader
   id: CameraStatic
   kind: source
   path: "/Textures/Shaders/camera_static.swsl"

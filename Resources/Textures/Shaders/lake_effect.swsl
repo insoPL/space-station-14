@@ -1,0 +1,53 @@
+
+highp float easeInOut(highp float t) {
+    return t * t * (3.0 - 2.0 * t);
+}
+
+highp float easeInOutSine(highp float t) {
+    return 0.5 * (1.0 - cos(t * 3.1415926));
+}
+
+void Blend_Subtract_float4(float4 Base, float4 Blend, highp float Opacity, out float4 Out)
+{
+    Out = Base - Blend;
+    Out = lerp(Base, Out, Opacity);
+}
+
+const highp float water_base_texture_size = 340.0; // tilset texture
+const highp float noise_texture_size = 512.0;
+const highp float tile_cell_size = 16.0; // tilemap cell size
+
+void fragment() {
+        // for effective, get from const parameters
+	//float noise_texture_size = float(textureSize(noise, 0).x);
+	//float water_base_texture_size = float(textureSize(water_base, 0).x);
+	vec2 uv = world_pos/tile_cell_size; 
+	vec2 water_uv = uv*tile_cell_size/water_base_texture_size;
+
+	vec2 noise_uv = uv*tile_cell_size/noise_texture_size;
+	vec4 noise_color = texture(noise, noise_uv+TIME*.1);
+	vec2 offset_rand = noise_color.xy;
+	
+	float noise_fade = texture(noise, noise_uv).x;
+	
+	water_uv = mix (water_uv, water_uv - offset_rand, vec2(rippling));
+	water_uv = floor(water_uv*water_base_texture_size)/water_base_texture_size; // pixelate
+	vec4 water_color = texture(water_base, water_uv*vec2(scale_water, scale_water+scale_water_extra));
+	float white_alpha = water_color.a ;//* noise_fade;//step(0.5, noise_fade); // 0 or 1
+	white_alpha *= clamp(noise_fade-0.2, 0.0, 1.0);
+	water_color = mix(water_color, main_color, 1.0 - white_alpha);
+	water_color = mix(water_color, water_color*base_color, white_alpha); // white bar with fade color
+	
+	
+
+	
+	float not_include_edge = (1.0-step(COLOR.r, 0))*(step(COLOR.g, 0))*(step(COLOR.b, 0));
+	COLOR = mix(COLOR, water_color, not_include_edge); //
+	// highlight
+	float light = 0.0;
+	COLOR = mix(COLOR, vec4(1.0), step(light, 0.3)*white_alpha*not_include_edge);
+	vec4 color;
+	COLOR = color;
+}
+
+
