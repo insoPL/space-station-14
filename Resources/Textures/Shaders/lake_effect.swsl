@@ -1,11 +1,13 @@
 // Sensitivity, in degrees.
+uniform highp vec4 LAKE_COLOR;
+
 const highp vec4 ReplacedColor = vec4(1,0,0,1);
 
 void fragment() {
     highp vec4 color = zTexture(UV);
 
     if (color == ReplacedColor) {
-        COLOR = vec4(255,255,255,255);
+        COLOR = LAKE_COLOR;
     } else {
         COLOR = color;
     }

@@ -28,7 +28,8 @@ public sealed partial class BodyOfWaterEffectSystem : EntitySystem
         if (!_spriteQuery.Resolve(sprite.Owner, ref sprite.Comp, false))
             return;
 
-        var shader = _proto.Index<ShaderPrototype>("LakeEffect").Instance();
+        var shader = _proto.Index<ShaderPrototype>("LakeEffect").InstanceUnique();
+        shader.SetParameter("LAKE_COLOR", new Vector4(95, 0, 127, 1));
 
         if (sprite.Comp.PostShader is not null && sprite.Comp.PostShader != shader)
             return;
