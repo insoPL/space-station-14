@@ -122,7 +122,10 @@
     pvsIncrease: 0.3
   - type: StaticPrice
     price: 3500
-
+  - type: ImageOverlay
+    pathToOverlayImage: "/Textures/Objects/Weapons/Guns/Snipers/heavy_sniper.rsi/AimMark.png"
+    additionalColorOverlay: "#00000020"
+    
 - type: entity
   name: musket
   parent: [ BaseWeaponSniper, BaseGunWieldable, BaseMajorContraband ]
