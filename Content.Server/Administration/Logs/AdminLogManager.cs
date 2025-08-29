@@ -87,6 +87,7 @@ public sealed partial class AdminLogManager : SharedAdminLogManager, IAdminLogMa
     // Per round
     private int _currentRoundId;
     private int _currentLogId;
+    private TimeSpan _currentRoundStartTime;
     private int NextLogId => Interlocked.Increment(ref _currentLogId);
     private GameRunLevel _runLevel = GameRunLevel.PreRoundLobby;
 
@@ -260,6 +261,7 @@ public sealed partial class AdminLogManager : SharedAdminLogManager, IAdminLogMa
 
     public void RoundStarting(int id)
     {
+        _currentRoundStartTime = _timing.CurTime;
         _currentRoundId = id;
         CacheNewRound();
     }
@@ -302,6 +304,13 @@ public sealed partial class AdminLogManager : SharedAdminLogManager, IAdminLogMa
             return;
         }
 
+        // PostgreSQL does not support storing null chars in text values.
+        if (message.Contains('\0'))
+        {
+            _sawmill.Error($"Null character detected in admin log message '{message}'! LogType: {type}, LogImpact: {impact}");
+            message = message.Replace("\0", "");
+        }
+
         var log = new AdminLog
         {
             Id = NextLogId,
@@ -309,6 +318,7 @@ public sealed partial class AdminLogManager : SharedAdminLogManager, IAdminLogMa
             Type = type,
             Impact = impact,
             Date = DateTime.UtcNow,
+            CurTime = (_timing.CurTime - _currentRoundStartTime).Ticks,
             Message = message,
             Json = json,
             Players = new List<AdminLogPlayer>(players.Count)
