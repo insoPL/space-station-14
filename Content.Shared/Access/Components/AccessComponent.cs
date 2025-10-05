@@ -1,7 +1,7 @@
 using Content.Shared.Access.Systems;
+using Content.Shared.Tag;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
-using Robust.Shared.Serialization.TypeSerializers.Implementations.Custom.Prototype.Set;
 
 namespace Content.Shared.Access.Components;
 
@@ -31,6 +31,12 @@ public sealed partial class AccessComponent : Component
     [DataField(readOnly: true)]
     [AutoNetworkedField]
     public HashSet<ProtoId<AccessGroupPrototype>> Groups = new();
+
+    /// <summary>
+    /// Optional whitelist for targets of this access provider. Can be used to create access provider that only works on specificly tagged target like doors.
+    /// </summary>
+    [DataField]
+    public HashSet<ProtoId<TagPrototype>> TargetWhitelist = new();
 }
 
 /// <summary>

@@ -1,0 +1,83 @@
+- type: entity
+  parent: Clothing
+  id: AccessBadge
+  name: Door Access Badge
+  abstract: true
+  components:
+  - type: Item
+    size: Small
+  - type: Clothing
+    quickEquip: true
+    slots:
+    - neck
+    sprite: Clothing/Neck/Misc/lawyerbadge.rsi
+  - type: Sprite
+    state: icon
+    sprite: Clothing/Neck/Misc/lawyerbadge.rsi
+  - type: Access
+    groups:
+    - AllAccess
+    targetWhitelist:
+      - Airlock
+      - GlassAirlock
+      - HighSecDoor
+  - type: StationRecordKeyStorage
+  - type: Tag
+    tags:
+    - DoorBumpOpener
+  - type: TemporaryAccess
+    accessExpireTime: 300
+
+- type: entity
+  parent: AccessBadge
+  id: AllAccessAccessBadge
+  name: All Access Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - AllAccess
+
+- type: entity
+  parent: AccessBadge
+  id: SecurityAccessBadge
+  name: Security Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - Security
+
+- type: entity
+  parent: AccessBadge
+  id: EngineeringAccessBadge
+  name: Engineering Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - Engineering
+    
+- type: entity
+  parent: AccessBadge
+  id: MedicalAccessBadge
+  name: Medical Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - Medical
+    
+- type: entity
+  parent: AccessBadge
+  id: ResearchAccessBadge
+  name: Research Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - Research
+    
+- type: entity
+  parent: AccessBadge
+  id: CargoAccessBadge
+  name: Cargo Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - Cargo

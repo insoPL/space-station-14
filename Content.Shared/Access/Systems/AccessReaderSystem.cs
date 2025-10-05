@@ -185,6 +185,7 @@ public sealed class AccessReaderSystem : EntitySystem
             return true;
 
         var accessSources = FindPotentialAccessItems(user);
+        FilterAccessSourcesWhitelist(accessSources, target);
         var access = FindAccessTags(user, accessSources);
         FindStationRecordKeys(user, out var stationKeys, accessSources);
 
@@ -195,6 +196,20 @@ public sealed class AccessReaderSystem : EntitySystem
             LogAccess((target, reader), user);
 
         return true;
+    }
+
+    private void FilterAccessSourcesWhitelist(HashSet<EntityUid> accessSources, EntityUid target)
+    {
+        accessSources.RemoveWhere(accessSource =>
+        {
+            if (!TryComp<AccessComponent>(accessSource, out var accessComponent))
+                return false;
+
+            if (accessComponent.TargetWhitelist == null || accessComponent.TargetWhitelist.Count == 0)
+                return false;
+
+            return !_tag.HasAnyTag(target, accessComponent.TargetWhitelist);
+        });
     }
 
     /// <summary>
