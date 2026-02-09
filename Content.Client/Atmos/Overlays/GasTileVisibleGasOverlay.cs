@@ -40,7 +40,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
 
     private int _gasCount;
 
-    public const int GasOverlayZIndex = (int) Shared.DrawDepth.DrawDepth.Effects; // Under ghosts, above mostly everything else
+    public const int GasOverlayZIndex = (int) Shared.DrawDepth.DrawDepth.Gasses; // Under ghosts, above mostly everything else
 
     public GasTileVisibleGasOverlay(GasTileOverlaySystem system, IEntityManager entManager, IResourceCache resourceCache, IPrototypeManager protoMan, SpriteSystem spriteSys, SharedTransformSystem xformSys)
     {
