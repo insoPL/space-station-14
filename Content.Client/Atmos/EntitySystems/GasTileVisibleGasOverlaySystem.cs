@@ -1,5 +1,4 @@
 using Content.Client.Atmos.Overlays;
-using Content.Shared.Atmos.EntitySystems;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;

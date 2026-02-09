@@ -106,9 +106,6 @@ public sealed class GasTileFireOverlay : Overlay
 
         var mapUid = _mapSystem.GetMapOrInvalid(args.MapId);
 
-        if (_entManager.TryGetComponent<MapAtmosphereComponent>(mapUid, out var atmos))
-            DrawMapOverlay(drawHandle, args, mapUid, atmos);
-
         if (args.Space != OverlaySpace.WorldSpaceEntities)
             return;
 
@@ -143,8 +140,6 @@ public sealed class GasTileFireOverlay : Overlay
                 // ever moved to a single atlas, that should no longer be the case. So this is just grouping draw calls
                 // by chunk, even though its currently slower.
 
-                state.drawHandle.UseShader(null);
-
                 // And again for fire, with the unshaded shader
                 state.drawHandle.UseShader(state.shader);
                 foreach (var chunk in comp.Chunks.Values)
@@ -171,41 +166,5 @@ public sealed class GasTileFireOverlay : Overlay
 
         drawHandle.UseShader(null);
         drawHandle.SetTransform(Matrix3x2.Identity);
-    }
-
-    private void DrawMapOverlay(
-        DrawingHandleWorld handle,
-        OverlayDrawArgs args,
-        EntityUid map,
-        MapAtmosphereComponent atmos)
-    {
-        var mapGrid = _entManager.HasComponent<MapGridComponent>(map);
-
-        // map-grid atmospheres get drawn above grids
-        if (mapGrid && args.Space != OverlaySpace.WorldSpaceEntities)
-            return;
-
-        // Normal map atmospheres get drawn below grids
-        if (!mapGrid && args.Space != OverlaySpace.WorldSpaceBelowWorld)
-            return;
-
-        var bottomLeft = args.WorldAABB.BottomLeft.Floored();
-        var topRight = args.WorldAABB.TopRight.Ceiled();
-
-        for (var x = bottomLeft.X; x <= topRight.X; x++)
-        {
-            for (var y = bottomLeft.Y; y <= topRight.Y; y++)
-            {
-                var tilePosition = new Vector2(x, y);
-
-                for (var i = 0; i < atmos.OverlayData.Opacity.Length; i++)
-                {
-                    var opacity = atmos.OverlayData.Opacity[i];
-
-                    if (opacity > 0)
-                        handle.DrawTexture(_frames[i][_frameCounter[i]], tilePosition, Color.White.WithAlpha(opacity));
-                }
-            }
-        }
     }
 }
