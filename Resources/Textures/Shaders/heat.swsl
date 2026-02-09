@@ -1,8 +1,8 @@
 uniform sampler2D SCREEN_TEXTURE;
 
 uniform highp float spatial_scalee = 22.0;
-uniform highp float strength_scalee = 0.05;
-uniform highp float speed_scalee = 1.0;
+uniform highp float strength_scalee = 0.005;
+uniform highp float speed_scalee = 8.0;
 
 highp float hash(highp vec2 p)
 {
@@ -57,5 +57,5 @@ void fragment()
 
     highp vec2 distortedUV = UV + (distortion * strength_scalee * heatStrength);
     
-    COLOR  = texture(SCREEN_TEXTURE, distortedUV);
+    COLOR  = texture2D(SCREEN_TEXTURE, distortedUV);
 }

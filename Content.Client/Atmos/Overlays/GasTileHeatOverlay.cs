@@ -2,6 +2,7 @@ using System.Numerics;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Client.Atmos.EntitySystems;
+using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.CCVar;
 using Robust.Client.Graphics;
 using Robust.Shared.Configuration;
@@ -148,7 +149,7 @@ public sealed class GasTileHeatOverlay : Overlay
                                 continue;
 
                             // Get the distortion strength from the temperature and bail if it's not hot enough
-                            var strength = _gasTileOverlay.GetHeatDistortionStrength(tileGas.ByteGasTemperature);
+                            var strength = GetHeatDistortionStrength(tileGas.ByteGasTemperature);
                             if (strength <= 0f)
                                 continue;
 
@@ -206,5 +207,20 @@ public sealed class GasTileHeatOverlay : Overlay
         _heatBlurTarget = null;
         _configManager.UnsubValueChanged(CCVars.ReducedMotion, SetReducedMotion);
         base.DisposeBehavior();
+    }
+
+    const int MinDistortionTemp = 500;
+    const int MaxDistortionTemp = 1500;
+
+    private float GetHeatDistortionStrength(ThermalByte temp)
+    {
+        if (!temp.TryGetTemperature(out var kelvinTemp, true))
+        {
+            return 0f;
+        }
+
+        float strength = (kelvinTemp - MinDistortionTemp) / (MaxDistortionTemp - MinDistortionTemp);
+
+        return MathHelper.Clamp01(strength);
     }
 }

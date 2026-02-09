@@ -108,13 +108,5 @@ namespace Content.Client.Atmos.EntitySystems
                 }
             }
         }
-
-        internal float GetHeatDistortionStrength(ThermalByte temp)
-        {
-            temp.TryGetTemperature(out var kelvinTemp, true);
-            kelvinTemp -= 300;
-            kelvinTemp *= 0.001f;
-            return MathHelper.Clamp01(kelvinTemp);
-        }
     }
 }
