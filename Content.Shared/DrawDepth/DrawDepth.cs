@@ -113,7 +113,7 @@ namespace Content.Shared.DrawDepth
         Overdoors = DrawDepthTag.Default + 10,
 
         /// <summary>
-        ///     Atmos gasses.
+        ///     Visible atmos gas.
         /// </summary>
         Gasses = DrawDepthTag.Default + 11,
 

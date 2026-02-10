@@ -15,7 +15,7 @@ using Robust.Shared.Timing;
 namespace Content.Client.Atmos.Overlays;
 
 /// <summary>
-///     Overlay responsible for rendering atmos fire animation..
+///     Overlay responsible for rendering atmos fire animation.
 /// </summary>
 public sealed class GasTileFireOverlay : Overlay
 {
