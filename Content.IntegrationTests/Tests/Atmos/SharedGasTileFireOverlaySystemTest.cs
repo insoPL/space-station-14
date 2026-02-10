@@ -11,7 +11,7 @@ using System.Numerics;
 namespace Content.IntegrationTests.Tests.Atmos;
 
 /// <summary>
-/// GasTileOverlay is being tested here
+/// GasTileOverlay is being tested here for networking of atmos fires
 /// </summary>
 public sealed class SharedGasTileFireOverlaySystemTest : AtmosTest
 {
