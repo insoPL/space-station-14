@@ -1,5 +1,4 @@
 using Content.Client.Atmos.Overlays;
-using Content.Shared.Atmos.EntitySystems;
 using JetBrains.Annotations;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
@@ -8,8 +7,10 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client.Atmos.EntitySystems;
 
+/// <summary>
+///     System responsible for rendering atmos fire animations using <see cref="GasTileFireOverlay"/>.
+/// </summary>
 [UsedImplicitly]
-
 public sealed class GasTileFireOverlaySystem : EntitySystem
 {
     [Dependency] private readonly IResourceCache _resourceCache = default!;

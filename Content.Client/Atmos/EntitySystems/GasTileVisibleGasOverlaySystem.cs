@@ -7,8 +7,10 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client.Atmos.EntitySystems;
 
+/// <summary>
+///     System responsible for rendering visible atmos gasses (like plasma for example) using <see cref="GasTileVisibleGasOverlay"/>.
+/// </summary>
 [UsedImplicitly]
-
 public sealed class GasTileVisibleGasOverlaySystem : EntitySystem
 {
     [Dependency] private readonly IResourceCache _resourceCache = default!;

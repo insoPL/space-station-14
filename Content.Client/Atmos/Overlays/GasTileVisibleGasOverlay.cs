@@ -17,6 +17,9 @@ using Robust.Shared.Utility;
 
 namespace Content.Client.Atmos.Overlays;
 
+/// <summary>
+///     Overlay responsible for rendering visible atmos gasses (like plasma for example) usin.
+/// </summary>
 public sealed class GasTileVisibleGasOverlay : Overlay
 {
     private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
@@ -40,7 +43,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
 
     private int _gasCount;
 
-    public const int GasOverlayZIndex = (int) Shared.DrawDepth.DrawDepth.Gasses; // Under ghosts, above mostly everything else
+    public const int GasOverlayZIndex = (int) Shared.DrawDepth.DrawDepth.Gasses; // Under ghosts and fire, above mostly everything else
 
     public GasTileVisibleGasOverlay(GasTileOverlaySystem system, IEntityManager entManager, IResourceCache resourceCache, IPrototypeManager protoMan, SpriteSystem spriteSys, SharedTransformSystem xformSys)
     {

@@ -1,5 +1,4 @@
 using System.Numerics;
-using Content.Client.Atmos.Components;
 using Content.Client.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
@@ -15,6 +14,9 @@ using Robust.Shared.Timing;
 
 namespace Content.Client.Atmos.Overlays;
 
+/// <summary>
+///     Overlay responsible for rendering atmos fire animation..
+/// </summary>
 public sealed class GasTileFireOverlay : Overlay
 {
     private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
@@ -27,7 +29,6 @@ public sealed class GasTileFireOverlay : Overlay
     public override OverlaySpace Space => OverlaySpace.WorldSpaceEntities | OverlaySpace.WorldSpaceBelowWorld;
     private readonly ShaderInstance _shader;
 
-    // Gas overlays
     private readonly float[] _timer;
     private readonly float[][] _frameDelays;
     private readonly int[] _frameCounter;
@@ -35,7 +36,6 @@ public sealed class GasTileFireOverlay : Overlay
     // TODO combine textures into a single texture atlas.
     private readonly Texture[][] _frames;
 
-    // Fire overlays
     private const int FireStates = 3;
     private const string FireRsiPath = "/Textures/Effects/fire.rsi";
 
@@ -67,6 +67,7 @@ public sealed class GasTileFireOverlay : Overlay
             _frameCounter[i] = 0;
         }
     }
+
     protected override void FrameUpdate(FrameEventArgs args)
     {
         base.FrameUpdate(args);
@@ -140,7 +141,6 @@ public sealed class GasTileFireOverlay : Overlay
                 // ever moved to a single atlas, that should no longer be the case. So this is just grouping draw calls
                 // by chunk, even though its currently slower.
 
-                // And again for fire, with the unshaded shader
                 state.drawHandle.UseShader(state.shader);
                 foreach (var chunk in comp.Chunks.Values)
                 {
