@@ -13,7 +13,7 @@ using Robust.Shared.Prototypes;
 
 namespace Content.Client.Atmos.Overlays;
 
-public sealed class GasTileHeatOverlay : Overlay
+public sealed class GasTileHeatBlurOverlay : Overlay
 {
     public override bool RequestScreenTexture { get; set; } = true;
     private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
@@ -35,7 +35,7 @@ public sealed class GasTileHeatOverlay : Overlay
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
     private readonly ShaderInstance _shader;
 
-    public GasTileHeatOverlay()
+    public GasTileHeatBlurOverlay()
     {
         IoCManager.InjectDependencies(this);
         _xformSys = _entManager.System<SharedTransformSystem>();
@@ -72,7 +72,7 @@ public sealed class GasTileHeatOverlay : Overlay
             _heatTarget = _clyde.CreateRenderTarget(
                 target.Size,
                 new RenderTargetFormatParameters(RenderTargetColorFormat.Rgba8Srgb),
-                name: nameof(GasTileHeatOverlay));
+                name: nameof(GasTileHeatBlurOverlaySystem));
         }
         if (_heatBlurTarget?.Texture.Size != target.Size)
         {
@@ -80,7 +80,7 @@ public sealed class GasTileHeatOverlay : Overlay
             _heatBlurTarget = _clyde.CreateRenderTarget(
                 target.Size,
                 new RenderTargetFormatParameters(RenderTargetColorFormat.Rgba8Srgb),
-                name: $"{nameof(GasTileHeatOverlay)}-blur");
+                name: $"{nameof(GasTileHeatBlurOverlaySystem)}-blur");
         }
 
         var overlayQuery = _entManager.GetEntityQuery<GasTileOverlayComponent>();
