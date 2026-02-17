@@ -1,14 +1,11 @@
 using Content.Client.Atmos.Overlays;
 using JetBrains.Annotations;
-using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
-using Robust.Client.ResourceManagement;
-using Robust.Shared.Prototypes;
 
 namespace Content.Client.Atmos.EntitySystems;
 
 /// <summary>
-///     System responsible for rendering visible atmos gasses (like plasma for example) using <see cref="GasTileVisibleGasOverlay"/>.
+///     System responsible for rendering heat distortion using <see cref="GasTileHeatBlurOverlay"/>.
 /// </summary>
 [UsedImplicitly]
 public sealed class GasTileHeatBlurOverlaySystem : EntitySystem

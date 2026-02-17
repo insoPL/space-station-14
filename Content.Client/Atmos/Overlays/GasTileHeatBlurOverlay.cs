@@ -160,7 +160,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                             // So we use this alpha channel to chop the lower alpha values off in the shader to fit a
                             // fit mask back into the tile.
                             worldHandle.DrawRect(
-                                Box2.CenteredAround(tilePosition + new Vector2(0.5f, 0.5f), grid.Comp.TileSizeVector),
+                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector),
                                 new Color(strength, 0f, 0f, strength > 0f ? 1.0f : 0f));
                         }
                     }
@@ -209,8 +209,8 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         base.DisposeBehavior();
     }
 
-    const int MinDistortionTemp = 500;
-    const int MaxDistortionTemp = 1500;
+    const int MinDistortionTemp = 300;
+    const int MaxDistortionTemp = 2000;
 
     private float GetHeatDistortionStrength(ThermalByte temp)
     {

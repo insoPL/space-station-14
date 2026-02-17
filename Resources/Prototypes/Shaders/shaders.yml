@@ -117,6 +117,6 @@
   path: "/Textures/Shaders/hologram.swsl"
   
 - type: shader
-  id: Heat
+  id: HeatBlur
   kind: source
-  path: "/Textures/Shaders/heat.swsl"
+  path: "/Textures/Shaders/heatBlur.swsl"
