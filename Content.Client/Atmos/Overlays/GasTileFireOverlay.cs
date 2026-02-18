@@ -1,7 +1,7 @@
-using System.Numerics;
 using Content.Client.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
+using Content.Shared.Species;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
@@ -11,6 +11,7 @@ using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
+using System.Numerics;
 
 namespace Content.Client.Atmos.Overlays;
 
@@ -19,14 +20,16 @@ namespace Content.Client.Atmos.Overlays;
 /// </summary>
 public sealed class GasTileFireOverlay : Overlay
 {
-    private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
-
-    private readonly IEntityManager _entManager;
-    private readonly IMapManager _mapManager;
-    private readonly SharedMapSystem _mapSystem;
-    private readonly SharedTransformSystem _xformSys;
+    [Dependency] private readonly IPrototypeManager _protoMan = default!;
+    [Dependency] private readonly IResourceCache _resourceCache = default!;
+    [Dependency] private readonly IEntityManager _entManager = default!;
+    [Dependency] private readonly IMapManager _mapManager = default!;
 
     public override OverlaySpace Space => OverlaySpace.WorldSpaceEntities | OverlaySpace.WorldSpaceBelowWorld;
+    private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
+
+    private readonly SharedTransformSystem _xformSys;
+    private readonly SharedMapSystem _mapSystem = default!;
     private readonly ShaderInstance _shader;
 
     private readonly float[] _timer;
@@ -41,13 +44,12 @@ public sealed class GasTileFireOverlay : Overlay
 
     public const int GasOverlayZIndex = (int)Shared.DrawDepth.DrawDepth.Effects; // Under ghosts, above mostly everything else
 
-    public GasTileFireOverlay(GasTileOverlaySystem system, IEntityManager entManager, IResourceCache resourceCache, IPrototypeManager protoMan, SpriteSystem spriteSys, SharedTransformSystem xformSys)
+    public GasTileFireOverlay()
     {
-        _entManager = entManager;
-        _mapManager = IoCManager.Resolve<IMapManager>();
-        _mapSystem = entManager.System<SharedMapSystem>();
-        _xformSys = xformSys;
-        _shader = protoMan.Index(UnshadedShader).Instance();
+        IoCManager.InjectDependencies(this);
+        _xformSys = _entManager.System<SharedTransformSystem>();
+        _mapSystem = _entManager.System<SharedMapSystem>();
+        _shader = _protoMan.Index(UnshadedShader).Instance();
         ZIndex = GasOverlayZIndex;
 
         _timer = new float[FireStates];
@@ -55,7 +57,7 @@ public sealed class GasTileFireOverlay : Overlay
         _frameCounter = new int[FireStates];
         _frames = new Texture[FireStates][];
 
-        var fire = resourceCache.GetResource<RSIResource>(FireRsiPath).RSI;
+        var fire = _resourceCache.GetResource<RSIResource>(FireRsiPath).RSI;
 
         for (var i = 0; i < FireStates; i++)
         {

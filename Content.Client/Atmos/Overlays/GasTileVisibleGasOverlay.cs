@@ -1,6 +1,4 @@
-using System.Numerics;
 using Content.Client.Atmos.Components;
-using Content.Client.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
@@ -14,6 +12,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
+using System.Numerics;
 
 namespace Content.Client.Atmos.Overlays;
 
@@ -22,13 +21,19 @@ namespace Content.Client.Atmos.Overlays;
 /// </summary>
 public sealed class GasTileVisibleGasOverlay : Overlay
 {
+
+    [Dependency] private readonly IEntityManager _entManager = default!;
+    [Dependency] private readonly IResourceCache _resourceCache = default!;
+    [Dependency] private readonly IPrototypeManager _protoManager = default!;
+    [Dependency] private readonly IMapManager _mapManager = default!;
+
     private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
 
-    private readonly IEntityManager _entManager;
-    private readonly IMapManager _mapManager;
     private readonly SharedAtmosphereSystem _atmosphereSystem;
     private readonly SharedMapSystem _mapSystem;
     private readonly SharedTransformSystem _xformSys;
+    private readonly SharedGasTileOverlaySystem _gasTileOverlaySystem;
+    private readonly SpriteSystem _spriteSystem;
 
     public override OverlaySpace Space => OverlaySpace.WorldSpaceEntities | OverlaySpace.WorldSpaceBelowWorld;
     private readonly ShaderInstance _shader;
@@ -45,17 +50,19 @@ public sealed class GasTileVisibleGasOverlay : Overlay
 
     public const int GasOverlayZIndex = (int) Shared.DrawDepth.DrawDepth.Gasses; // Under ghosts and fire, above mostly everything else
 
-    public GasTileVisibleGasOverlay(GasTileOverlaySystem system, IEntityManager entManager, IResourceCache resourceCache, IPrototypeManager protoMan, SpriteSystem spriteSys, SharedTransformSystem xformSys)
+    public GasTileVisibleGasOverlay()
     {
-        _entManager = entManager;
-        _mapManager = IoCManager.Resolve<IMapManager>();
-        _atmosphereSystem = entManager.System<SharedAtmosphereSystem>();
-        _mapSystem = entManager.System<SharedMapSystem>();
-        _xformSys = xformSys;
-        _shader = protoMan.Index(UnshadedShader).Instance();
+        IoCManager.InjectDependencies(this);
+        _atmosphereSystem = _entManager.System<SharedAtmosphereSystem>();
+        _mapSystem = _entManager.System<SharedMapSystem>();
+        _xformSys = _entManager.System<SharedTransformSystem>();
+        _gasTileOverlaySystem = _entManager.System<SharedGasTileOverlaySystem>();
+        _spriteSystem = _entManager.System<SpriteSystem>();
+
+        _shader = _protoManager.Index(UnshadedShader).Instance();
         ZIndex = GasOverlayZIndex;
 
-        _gasCount = system.VisibleGasId.Length;
+        _gasCount = _gasTileOverlaySystem.VisibleGasId.Length;
         _timer = new float[_gasCount];
         _frameDelays = new float[_gasCount][];
         _frameCounter = new int[_gasCount];
@@ -63,7 +70,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
 
         for (var i = 0; i < _gasCount; i++)
         {
-            var gasPrototype = _atmosphereSystem.GetGas(system.VisibleGasId[i]);
+            var gasPrototype = _atmosphereSystem.GetGas(_gasTileOverlaySystem.VisibleGasId[i]);
 
             SpriteSpecifier overlay;
 
@@ -77,7 +84,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
             switch (overlay)
             {
                 case SpriteSpecifier.Rsi animated:
-                    var rsi = resourceCache.GetResource<RSIResource>(animated.RsiPath).RSI;
+                    var rsi = _resourceCache.GetResource<RSIResource>(animated.RsiPath).RSI;
                     var stateId = animated.RsiState;
 
                     if (!rsi.TryGetState(stateId, out var state))
@@ -88,7 +95,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
                     _frameCounter[i] = 0;
                     break;
                 case SpriteSpecifier.Texture texture:
-                    _frames[i] = new[] { spriteSys.Frame0(texture) };
+                    _frames[i] = new[] { _spriteSystem.Frame0(texture) };
                     _frameDelays[i] = Array.Empty<float>();
                     break;
             }

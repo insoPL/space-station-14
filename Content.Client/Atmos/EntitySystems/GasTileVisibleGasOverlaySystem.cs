@@ -1,9 +1,6 @@
 using Content.Client.Atmos.Overlays;
 using JetBrains.Annotations;
-using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
-using Robust.Client.ResourceManagement;
-using Robust.Shared.Prototypes;
 
 namespace Content.Client.Atmos.EntitySystems;
 
@@ -13,12 +10,7 @@ namespace Content.Client.Atmos.EntitySystems;
 [UsedImplicitly]
 public sealed class GasTileVisibleGasOverlaySystem : EntitySystem
 {
-    [Dependency] private readonly IResourceCache _resourceCache = default!;
     [Dependency] private readonly IOverlayManager _overlayMan = default!;
-    [Dependency] private readonly SpriteSystem _spriteSys = default!;
-    [Dependency] private readonly SharedTransformSystem _xformSys = default!;
-    [Dependency] private readonly GasTileOverlaySystem _networkedGasTileOverlay = default!;
-    [Dependency] private readonly IPrototypeManager _protoMan = default!;
 
     private GasTileVisibleGasOverlay _visibleGasOverlay = default!;
 
@@ -26,7 +18,7 @@ public sealed class GasTileVisibleGasOverlaySystem : EntitySystem
     {
         base.Initialize();
 
-        _visibleGasOverlay = new GasTileVisibleGasOverlay(_networkedGasTileOverlay, EntityManager, _resourceCache, _protoMan, _spriteSys, _xformSys);
+        _visibleGasOverlay = new GasTileVisibleGasOverlay();
         _overlayMan.AddOverlay(_visibleGasOverlay);
     }
 
