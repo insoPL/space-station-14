@@ -27,5 +27,4 @@ public sealed class GasTileHeatBlurOverlaySystem : EntitySystem
         base.Shutdown();
         _overlayMan.RemoveOverlay<GasTileHeatBlurOverlay>();
     }
-
 }

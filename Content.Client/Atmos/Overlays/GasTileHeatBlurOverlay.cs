@@ -28,23 +28,31 @@ public sealed class GasTileHeatBlurOverlay : Overlay
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly IClyde _clyde = default!;
     [Dependency] private readonly IConfigurationManager _configManager = default!;
-    // We can't resolve this immediately, because it's an entitysystem, but we will attempt to resolve and cache this
-    // once we begin to draw.
-    private GasTileOverlaySystem? _gasTileOverlay;
+
     private readonly SharedTransformSystem _xformSys;
+    private readonly ShaderInstance _shader;
 
     private IRenderTexture? _heatTarget;
     private IRenderTexture? _heatBlurTarget;
     private readonly Texture _noiseTexture = default!;
 
+    // Overlay settings
+    private const float ShaderSpilling = 50f;  // for example 100 - spills shader 1 tile from hotspot, 50 - spills it half tile
+    private const float ShaderStrength = 0.04f;  // Makes waves stronger
+    private const float ShaderScale = 1f;  // Makes more waves
+    private const float ShaderSpeed = 0.4f;  // Makes waves run faster
+
+    // Overlay settings for reduced motion setting
+    private const float ShaderStrengthForReducedMotion = 0.01f;
+    private const float ShaderScaleReducedMotion = 0.5f;
+    private const float ShaderSpeedReducedMotion = 0.25f;
+
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
-    private readonly ShaderInstance _shader;
 
     public GasTileHeatBlurOverlay()
     {
         IoCManager.InjectDependencies(this);
         _xformSys = _entManager.System<SharedTransformSystem>();
-
         _noiseTexture = GenerateNoiseTexture();
 
         _shader = _proto.Index(HeatOverlayShader).InstanceUnique();
@@ -53,19 +61,14 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
     private void SetReducedMotion(bool reducedMotion)
     {
-        _shader.SetParameter("strength_scale", reducedMotion ? 0.5f : 1f);
-        _shader.SetParameter("speed_scale", reducedMotion ? 0.25f : 1f);
+        _shader.SetParameter("strength_scale", reducedMotion ? ShaderStrengthForReducedMotion : ShaderStrength);
+        _shader.SetParameter("spatial_scale", reducedMotion ? ShaderScaleReducedMotion : ShaderScale);
+        _shader.SetParameter("speed_scale", reducedMotion ? ShaderSpeedReducedMotion : ShaderSpeed);
     }
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)
     {
         if (args.MapId == MapId.Nullspace)
-            return false;
-
-        // If we haven't resolved this yet, give it a try or bail
-        _gasTileOverlay ??= _entManager.System<GasTileOverlaySystem>();
-
-        if (_gasTileOverlay == null)
             return false;
 
         var target = args.Viewport.RenderTarget;
@@ -212,11 +215,10 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         if (ScreenTexture is null || _heatTarget is null || _heatBlurTarget is null)
             return;
 
-        _clyde.BlurRenderTarget(args.Viewport, _heatTarget, _heatBlurTarget, args.Viewport.Eye!, 14f);
+        _clyde.BlurRenderTarget(args.Viewport, _heatTarget, _heatBlurTarget, args.Viewport.Eye!, OverlaySpilling);
 
         _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
 
-        // Pass the pre-generated noise texture to the shader
         _shader.SetParameter("NOISE_TEXTURE", _noiseTexture);
 
         args.WorldHandle.UseShader(_shader);
@@ -228,8 +230,12 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
     protected override void DisposeBehavior()
     {
+        _heatTarget?.Dispose();
         _heatTarget = null;
+
+        _heatBlurTarget?.Dispose();
         _heatBlurTarget = null;
+
         _configManager.UnsubValueChanged(CCVars.ReducedMotion, SetReducedMotion);
         base.DisposeBehavior();
     }
