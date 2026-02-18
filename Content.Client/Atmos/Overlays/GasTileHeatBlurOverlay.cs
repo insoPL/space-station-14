@@ -1,7 +1,6 @@
-using System.Numerics;
+using Content.Client.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
-using Content.Client.Atmos.EntitySystems;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.CCVar;
 using Robust.Client.Graphics;
@@ -9,7 +8,12 @@ using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
+using Robust.Shared.Noise;
 using Robust.Shared.Prototypes;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using System.Numerics;
+using Color = Robust.Shared.Maths.Color;
 
 namespace Content.Client.Atmos.Overlays;
 
@@ -17,7 +21,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 {
     public override bool RequestScreenTexture { get; set; } = true;
     private static readonly ProtoId<ShaderPrototype> UnshadedShader = "unshaded";
-    private static readonly ProtoId<ShaderPrototype> HeatOverlayShader = "Heat";
+    private static readonly ProtoId<ShaderPrototype> HeatOverlayShader = "HeatBlur";
 
     [Dependency] private readonly IEntityManager _entManager = default!;
     [Dependency] private readonly IMapManager _mapManager = default!;
@@ -31,6 +35,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
     private IRenderTexture? _heatTarget;
     private IRenderTexture? _heatBlurTarget;
+    private readonly Texture _noiseTexture = default!;
 
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
     private readonly ShaderInstance _shader;
@@ -40,10 +45,10 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         IoCManager.InjectDependencies(this);
         _xformSys = _entManager.System<SharedTransformSystem>();
 
+        _noiseTexture = GenerateNoiseTexture();
+
         _shader = _proto.Index(HeatOverlayShader).InstanceUnique();
-
         _configManager.OnValueChanged(CCVars.ReducedMotion, SetReducedMotion, invokeImmediately: true);
-
     }
 
     private void SetReducedMotion(bool reducedMotion)
@@ -154,14 +159,12 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                                 continue;
 
                             anyDistortion = true;
-                            // Encode the strength in the red channel, then 1.0 alpha if it's an active tile.
-                            // BlurRenderTarget will then apply a blur around the edge, but we don't want it to bleed
-                            // past the tile.
-                            // So we use this alpha channel to chop the lower alpha values off in the shader to fit a
-                            // fit mask back into the tile.
+
+                            // Encode the strength in the red channel
+                            // alpha set to 1 as tile is active 
                             worldHandle.DrawRect(
                                 Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector),
-                                new Color(strength, 0f, 0f, strength > 0f ? 1.0f : 0f));
+                                new Color(strength, 0f, 0f, 1.0f));
                         }
                     }
                 }
@@ -172,14 +175,36 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         // no distortion, no need to render
         if (!anyDistortion)
         {
-            // Return the draw handle to normal settings
             args.WorldHandle.UseShader(null);
             args.WorldHandle.SetTransform(Matrix3x2.Identity);
             return false;
         }
 
-        // Clear to draw
         return true;
+    }
+
+    private Texture GenerateNoiseTexture()
+    {
+        var width = 512;
+        var height = 512;
+        var noise = new FastNoiseLite();
+
+        noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
+        noise.SetFractalType(FastNoiseLite.FractalType.FBm);
+        noise.SetFractalOctaves(4);
+        noise.SetFrequency(0.01f);
+
+        var image = new Image<Rgba32>(width, height);
+
+        for (var x = 0; x < width; x++)
+        {
+            for (var y = 0; y < height; y++)
+            {
+                var value = (noise.GetNoise(x, y) + 1f) / 2f;
+                image[x, y] = new Rgba32(value, value, value, 1f);
+            }
+        }
+        return Texture.LoadFromImage(image);
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -187,16 +212,16 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         if (ScreenTexture is null || _heatTarget is null || _heatBlurTarget is null)
             return;
 
-        // Blur to soften the edges of the distortion. the lower parts of the alpha channel need to get cut off in the
-        // distortion shader to keep them in tile bounds.
         _clyde.BlurRenderTarget(args.Viewport, _heatTarget, _heatBlurTarget, args.Viewport.Eye!, 14f);
 
-        // Set up and render the distortion
         _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
+
+        // Pass the pre-generated noise texture to the shader
+        _shader.SetParameter("NOISE_TEXTURE", _noiseTexture);
+
         args.WorldHandle.UseShader(_shader);
         args.WorldHandle.DrawTextureRect(_heatTarget.Texture, args.WorldBounds);
 
-        // Return the draw handle to normal settings
         args.WorldHandle.UseShader(null);
         args.WorldHandle.SetTransform(Matrix3x2.Identity);
     }
