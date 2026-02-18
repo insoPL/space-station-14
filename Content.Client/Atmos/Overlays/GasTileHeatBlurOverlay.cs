@@ -17,6 +17,9 @@ using Color = Robust.Shared.Maths.Color;
 
 namespace Content.Client.Atmos.Overlays;
 
+/// <summary>
+///     Overlay responsible for rendering heat distortion shader.
+/// </summary>
 public sealed class GasTileHeatBlurOverlay : Overlay
 {
     public override bool RequestScreenTexture { get; set; } = true;
@@ -35,6 +38,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
     private IRenderTexture? _heatTarget;
     private IRenderTexture? _heatBlurTarget;
     private readonly Texture _noiseTexture = default!;
+    private List<Entity<MapGridComponent>> _intersectingGrids = new();
 
     // Overlay settings
     private const float ShaderSpilling = 50f;  // for example 100 - spills shader 1 tile from hotspot, 50 - spills it half tile
@@ -46,6 +50,9 @@ public sealed class GasTileHeatBlurOverlay : Overlay
     private const float ShaderStrengthForReducedMotion = 0.01f;
     private const float ShaderScaleReducedMotion = 0.5f;
     private const float ShaderSpeedReducedMotion = 0.25f;
+
+    private const int MinDistortionTemp = 300; // Distortion starts to show up at this temperature
+    private const int MaxDistortionTemp = 2000; // Maximum distortion strength at this temperature
 
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
@@ -109,9 +116,9 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         args.WorldHandle.RenderInRenderTarget(_heatTarget,
             () =>
             {
-                List<Entity<MapGridComponent>> grids = new();
-                _mapManager.FindGridsIntersecting(mapId, worldAABB, ref grids);
-                foreach (var grid in grids)
+                _intersectingGrids.Clear();
+                _mapManager.FindGridsIntersecting(mapId, worldAABB, ref _intersectingGrids);
+                foreach (var grid in _intersectingGrids)
                 {
                     if (!overlayQuery.TryGetComponent(grid.Owner, out var comp))
                         continue;
@@ -215,7 +222,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         if (ScreenTexture is null || _heatTarget is null || _heatBlurTarget is null)
             return;
 
-        _clyde.BlurRenderTarget(args.Viewport, _heatTarget, _heatBlurTarget, args.Viewport.Eye!, OverlaySpilling);
+        _clyde.BlurRenderTarget(args.Viewport, _heatTarget, _heatBlurTarget, args.Viewport.Eye!, ShaderSpilling);
 
         _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
 
@@ -239,9 +246,6 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         _configManager.UnsubValueChanged(CCVars.ReducedMotion, SetReducedMotion);
         base.DisposeBehavior();
     }
-
-    const int MinDistortionTemp = 300;
-    const int MaxDistortionTemp = 2000;
 
     private float GetHeatDistortionStrength(ThermalByte temp)
     {
