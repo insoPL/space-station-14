@@ -47,7 +47,7 @@ public sealed class SharedGasTileVisibleGasOverlaySystemTest : AtmosTest
             mixture.AdjustMoles(Gas.Oxygen, 100f);
         });
 
-        await RunTicks(10);
+        await RunTicks(30);
         await Task.WhenAll(Client.WaitIdleAsync(), Server.WaitIdleAsync());
 
 

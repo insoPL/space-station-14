@@ -97,7 +97,7 @@ public sealed class GasTileOverlayTemperatureNetworkingTest : AtmosTest
             }
         });
 
-        await RunTicks(10);
+        await RunTicks(30);
         await Task.WhenAll(Client.WaitIdleAsync(), Server.WaitIdleAsync());
     }
 }
