@@ -49,9 +49,9 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
 
         float fraction = 0;
         Solution? solution = null;
-        if (component.InsertedItemSlotID != null)
+        if (component.InsertedItemSlotID != null && component.targetSolution != null)
         {
-            GetSolutionFromEntity(uid, component.InsertedItemSlotID, out solution);
+            GetSolutionFromEntity(uid, component.InsertedItemSlotID, component.targetSolution, out solution);
             if (solution != null)
                 fraction = solution.FillFraction;
         }
@@ -134,7 +134,7 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
                 SpriteSystem.LayerSetSprite((uid, args.Sprite), fillLayer, fillSprite);
             SpriteSystem.LayerSetRsiState((uid, args.Sprite), fillLayer, stateName);
 
-            if (component.InsertedItemSlotID != null && solution != null)
+            if (solution != null)
                 SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, solution.GetColor(_prototype));
             else if (changeColor && AppearanceSystem.TryGetData<Color>(uid, SolutionContainerVisuals.Color, out var color, args.Component))
                 SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, color);
@@ -164,7 +164,7 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
         _itemSystem.VisualsChanged(uid);
     }
 
-    private bool GetSolutionFromEntity(EntityUid containerUid, string insertedItemSlotID, out Solution? solution)
+    private bool GetSolutionFromEntity(EntityUid containerUid, string insertedItemSlotID, string targetSolution, out Solution? solution)
     {
         solution = null;
         var itemSlotsComponent = CompOrNull<ItemSlotsComponent>(containerUid);
@@ -175,11 +175,9 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
         var insertedUid = slot.Item;  //Uid of item (beaker for example) inserted into machine 
 
         if (insertedUid == null ||
-            !_solutionContainers.TryGetSolution(insertedUid.Value, "beaker", out _, out var outputSolution) ||
-            outputSolution == null)
+            !_solutionContainers.TryGetSolution(insertedUid.Value, targetSolution, out _, out solution) ||
+            solution == null)
             return false;
-
-        solution = outputSolution;
         return true;
     }
 

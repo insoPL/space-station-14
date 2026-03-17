@@ -67,5 +67,11 @@ namespace Content.Shared.Chemistry.Components
         /// </summary>
         [DataField]
         public string? InsertedItemSlotID = null;
+
+        /// <summary>
+        /// Optional, needed for inserted item based visuals. Name of the target Target Solution of the inserted item.
+        /// </summary>
+        [DataField]
+        public string? targetSolution = null;
     }
 }

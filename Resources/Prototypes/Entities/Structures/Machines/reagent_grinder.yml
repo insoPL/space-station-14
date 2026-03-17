@@ -43,6 +43,7 @@
     maxFillLevels: 5
     insertedItemSlotID: beakerSlot
     fillBaseName: beakerSlot
+    targetSolution: beaker
   - type: ApcPowerReceiver
     powerLoad: 0
   - type: PowerState
