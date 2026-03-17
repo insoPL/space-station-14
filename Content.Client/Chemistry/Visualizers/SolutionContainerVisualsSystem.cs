@@ -48,12 +48,12 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
         }
 
         float fraction = 0;
-        SolutionComponent? solutionComponent = null;
+        Solution? solution = null;
         if (component.InsertedItemSlotID != null)
         {
-            GetSolutionFromEntity(uid, component.InsertedItemSlotID, out solutionComponent);
-            if (solutionComponent != null)
-                fraction = solutionComponent.Solution.FillFraction;
+            GetSolutionFromEntity(uid, component.InsertedItemSlotID, out solution);
+            if (solution != null)
+                fraction = solution.FillFraction;
         }
         else if (!AppearanceSystem.TryGetData<float>(uid, SolutionContainerVisuals.FillFraction, out fraction, args.Component))
             return;
@@ -134,8 +134,8 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
                 SpriteSystem.LayerSetSprite((uid, args.Sprite), fillLayer, fillSprite);
             SpriteSystem.LayerSetRsiState((uid, args.Sprite), fillLayer, stateName);
 
-            if (component.InsertedItemSlotID != null && solutionComponent != null)
-                SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, solutionComponent.Solution.GetColor(_prototype));
+            if (component.InsertedItemSlotID != null && solution != null)
+                SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, solution.GetColor(_prototype));
             else if (changeColor && AppearanceSystem.TryGetData<Color>(uid, SolutionContainerVisuals.Color, out var color, args.Component))
                 SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, color);
             else
@@ -164,9 +164,9 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
         _itemSystem.VisualsChanged(uid);
     }
 
-    private bool GetSolutionFromEntity(EntityUid containerUid, string insertedItemSlotID, out SolutionComponent? solutionComponent)
+    private bool GetSolutionFromEntity(EntityUid containerUid, string insertedItemSlotID, out Solution? solution)
     {
-        solutionComponent = null;
+        solution = null;
         var itemSlotsComponent = CompOrNull<ItemSlotsComponent>(containerUid);
 
         if (itemSlotsComponent == null) return false;
@@ -175,11 +175,11 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
         var insertedUid = slot.Item;  //Uid of item (beaker for example) inserted into machine 
 
         if (insertedUid == null ||
-            !_solutionContainers.TryGetFitsInDispenser(insertedUid.Value, out var solution, out _) ||
-            solution == null)
+            !_solutionContainers.TryGetSolution(insertedUid.Value, "beaker", out _, out var outputSolution) ||
+            outputSolution == null)
             return false;
 
-        solutionComponent = solution;
+        solution = outputSolution;
         return true;
     }
 
