@@ -97,6 +97,8 @@
   - type: StaticPrice
     price: 30
   - type: DnaSubstanceTrace
+  - type: SolutionAppearanceRelay
+    solution: "beaker"
 
 - type: entity
   parent: BaseItem

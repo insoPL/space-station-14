@@ -1,11 +1,9 @@
 using Content.Client.Items.Systems;
 using Content.Shared.Chemistry;
 using Content.Shared.Chemistry.Components;
-using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Clothing;
 using Content.Shared.Clothing.Components;
-using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Hands;
 using Content.Shared.Item;
 using Content.Shared.Rounding;
@@ -18,8 +16,6 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
 {
     [Dependency] private readonly IPrototypeManager _prototype = default!;
     [Dependency] private readonly ItemSystem _itemSystem = default!;
-    [Dependency] private readonly AppearanceSystem _appearance = default!;
-    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainers = default!;
 
     public override void Initialize()
     {
@@ -47,16 +43,8 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
             }
         }
 
-        float fraction = 0;
-        Solution? solution = null;
-        if (component.InsertedItemSlotID != null && component.targetSolution != null)
-        {
-            GetSolutionFromEntity(uid, component.InsertedItemSlotID, component.targetSolution, out solution);
-            if (solution != null)
-                fraction = solution.FillFraction;
-        }
-        else if (!AppearanceSystem.TryGetData<float>(uid, SolutionContainerVisuals.FillFraction, out fraction, args.Component))
-            return;
+        if (!AppearanceSystem.TryGetData<float>(uid, SolutionContainerVisuals.FillFraction, out var fraction, args.Component))
+            fraction = 0f;
 
         if (args.Sprite == null)
             return;
@@ -134,9 +122,7 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
                 SpriteSystem.LayerSetSprite((uid, args.Sprite), fillLayer, fillSprite);
             SpriteSystem.LayerSetRsiState((uid, args.Sprite), fillLayer, stateName);
 
-            if (solution != null)
-                SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, solution.GetColor(_prototype));
-            else if (changeColor && AppearanceSystem.TryGetData<Color>(uid, SolutionContainerVisuals.Color, out var color, args.Component))
+            if (changeColor && AppearanceSystem.TryGetData<Color>(uid, SolutionContainerVisuals.Color, out var color, args.Component))
                 SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, color);
             else
                 SpriteSystem.LayerSetColor((uid, args.Sprite), fillLayer, Color.White);
@@ -155,30 +141,8 @@ public sealed class SolutionContainerVisualsSystem : VisualizerSystem<SolutionCo
             }
         }
 
-        var parentuid = Transform(uid).ParentUid;
-        var parentApp = CompOrNull<AppearanceComponent>(parentuid);
-        if (parentApp != null && HasComp<SolutionContainerVisualsComponent>(parentuid))
-            _appearance.QueueUpdate(parentuid, parentApp);
-
         // in-hand visuals
         _itemSystem.VisualsChanged(uid);
-    }
-
-    private bool GetSolutionFromEntity(EntityUid containerUid, string insertedItemSlotID, string targetSolution, out Solution? solution)
-    {
-        solution = null;
-        var itemSlotsComponent = CompOrNull<ItemSlotsComponent>(containerUid);
-
-        if (itemSlotsComponent == null) return false;
-
-        var slot = itemSlotsComponent.Slots[insertedItemSlotID];
-        var insertedUid = slot.Item;  //Uid of item (beaker for example) inserted into machine 
-
-        if (insertedUid == null ||
-            !_solutionContainers.TryGetSolution(insertedUid.Value, targetSolution, out _, out solution) ||
-            solution == null)
-            return false;
-        return true;
     }
 
     private void OnGetHeldVisuals(EntityUid uid, SolutionContainerVisualsComponent component, GetInhandVisualsEvent args)

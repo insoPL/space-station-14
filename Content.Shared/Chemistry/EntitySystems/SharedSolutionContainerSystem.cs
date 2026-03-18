@@ -289,7 +289,7 @@ public abstract partial class SharedSolutionContainerSystem : EntitySystem
     }
 
 
-    protected void UpdateAppearance(Entity<AppearanceComponent?> container, Entity<SolutionComponent, ContainedSolutionComponent> soln)
+    public void UpdateAppearance(Entity<AppearanceComponent?> container, Entity<SolutionComponent, ContainedSolutionComponent> soln)
     {
         var (uid, appearanceComponent) = container;
         if (!HasComp<SolutionContainerVisualsComponent>(uid) || !Resolve(uid, ref appearanceComponent, logMissing: false))
@@ -373,6 +373,11 @@ public abstract partial class SharedSolutionContainerSystem : EntitySystem
             AppearanceSystem.SetData(uid, SolutionContainerVisuals.BaseOverride, reagent.ToString(), appearanceComponent);
     }
 
+    public void UpdateAppearance(Entity<SolutionComponent> soln)
+    {
+        var (uid, comp) = soln;
+        UpdateAppearance((uid, comp, (AppearanceComponent?)null));
+    }
     /// <summary>
     ///     Removes part of the solution in the container.
     /// </summary>
