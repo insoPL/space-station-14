@@ -1,20 +1,20 @@
 using Content.Client.Atmos.EntitySystems;
 using Content.Client.Graphics;
+using Content.Client.Resources;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.CCVar;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Shared.Configuration;
 using Robust.Shared.Enums;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
-using Robust.Shared.Noise;
 using Robust.Shared.Prototypes;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System.Numerics;
 using Color = Robust.Shared.Maths.Color;
+using Texture = Robust.Client.Graphics.Texture;
 
 namespace Content.Client.Atmos.Overlays;
 
@@ -32,11 +32,13 @@ public sealed class GasTileHeatBlurOverlay : Overlay
     [Dependency] private readonly IPrototypeManager _proto = default!;
     [Dependency] private readonly IClyde _clyde = default!;
     [Dependency] private readonly IConfigurationManager _configManager = default!;
+    [Dependency] private readonly IResourceCache _resourceCache = default!;
 
     private readonly SharedTransformSystem _xformSys;
     private readonly ShaderInstance _shader;
 
-    private readonly Texture _noiseTexture = default!;
+    private readonly Texture _noiseTexture;
+    private readonly Texture _heatGradientTexture;
     private List<Entity<MapGridComponent>> _intersectingGrids = new();
     private readonly OverlayResourceCache<CachedResources> _resources = new();
 
@@ -53,14 +55,15 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
     private const int MinDistortionTemp = 300; // Distortion starts to show up at this temperature in Kelvins
     private const int MaxDistortionTemp = 2000; // Maximum distortion strength at this temperature in Kelvins
-
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
     public GasTileHeatBlurOverlay()
     {
         IoCManager.InjectDependencies(this);
         _xformSys = _entManager.System<SharedTransformSystem>();
-        _noiseTexture = GenerateNoiseTexture();
+
+        _noiseTexture = _resourceCache.GetTexture("/Textures/Effects/HeatBlur/perlin_noise.png");
+        _heatGradientTexture = _resourceCache.GetTexture("/Textures/Effects/HeatBlur/soft_circle.png");
 
         _shader = _proto.Index(HeatOverlayShader).InstanceUnique();
         _configManager.OnValueChanged(CCVars.ReducedMotion, SetReducedMotion, invokeImmediately: true);
@@ -159,7 +162,6 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
                         while (enumerator.MoveNext(out var tileGas))
                         {
-                            // --->
                             // Check and make sure the tile is within the viewport/screen
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);
                             if (!localBounds.Contains(tilePosition))
@@ -174,8 +176,9 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
                             // Encode the strength in the red channel
                             // alpha set to 1 as tile is active 
-                            worldHandle.DrawRect(
-                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector),
+                            worldHandle.DrawTextureRect(
+                                _heatGradientTexture,
+                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector * 2.5f),
                                 new Color(strength, 0f, 0f, 1.0f));
                         }
                     }
@@ -195,38 +198,12 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         return true;
     }
 
-    private Texture GenerateNoiseTexture()
-    {
-        var width = 512;
-        var height = 512;
-        var noise = new FastNoiseLite();
-
-        noise.SetNoiseType(FastNoiseLite.NoiseType.Perlin);
-        noise.SetFractalType(FastNoiseLite.FractalType.FBm);
-        noise.SetFractalOctaves(4);
-        noise.SetFrequency(0.01f);
-
-        var image = new Image<Rgba32>(width, height);
-
-        for (var x = 0; x < width; x++)
-        {
-            for (var y = 0; y < height; y++)
-            {
-                var value = (noise.GetNoise(x, y) + 1f) / 2f;
-                image[x, y] = new Rgba32(value, value, value, 1f);
-            }
-        }
-        return Texture.LoadFromImage(image);
-    }
-
     protected override void Draw(in OverlayDrawArgs args)
     {
         var res = _resources.GetForViewport(args.Viewport, static _ => new CachedResources());
 
         if (ScreenTexture is null || res.HeatTarget is null || res.HeatBlurTarget is null)
             return;
-
-        _clyde.BlurRenderTarget(args.Viewport, res.HeatTarget, res.HeatBlurTarget, args.Viewport.Eye!, ShaderSpilling);
 
         _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
         _shader.SetParameter("NOISE_TEXTURE", _noiseTexture);
