@@ -43,7 +43,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
     private readonly OverlayResourceCache<CachedResources> _resources = new();
 
     // Overlay settings
-    private const float ShaderSpilling = 50f;  // for example 100 - spills shader 1 tile from hotspot, 50 - spills it half tile
+    private const float ShaderSpilling = 2.5f;  // for example 4f - spills shader one tile from hotspot, 2.5f - spills it half tile
     private const float ShaderStrength = 0.04f;  // Makes waves stronger
     private const float ShaderScale = 1f;  // Makes more waves
     private const float ShaderSpeed = 0.4f;  // Makes waves run faster
@@ -55,6 +55,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
     private const int MinDistortionTemp = 300; // Distortion starts to show up at this temperature in Kelvins
     private const int MaxDistortionTemp = 2000; // Maximum distortion strength at this temperature in Kelvins
+
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
     public GasTileHeatBlurOverlay()
@@ -178,7 +179,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                             // alpha set to 1 as tile is active 
                             worldHandle.DrawTextureRect(
                                 _heatGradientTexture,
-                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector * 2.5f),
+                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector * ShaderSpilling),
                                 new Color(strength, 0f, 0f, 1.0f));
                         }
                     }
