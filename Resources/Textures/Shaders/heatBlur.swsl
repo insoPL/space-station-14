@@ -2,9 +2,9 @@ uniform sampler2D SCREEN_TEXTURE;
 uniform sampler2D NOISE_TEXTURE; // The pre-generated noise
 
 // Those 3 are overwritten at SetReducedMotion
-uniform highp float spatial_scale = 1.0; // Makes more waves
-uniform highp float strength_scale = 0.005; // Makes waves stronger
-uniform highp float speed_scale = 0.25; // Makes waves run faster
+uniform highp float spatial_scale; // Makes more waves
+uniform highp float strength_scale; // Makes waves stronger
+uniform highp float speed_scale; // Makes waves run faster
 
 void fragment()
 {
