@@ -176,11 +176,11 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                             anyDistortion = true;
 
                             // Encode the strength in the red channel
-                            // alpha set to 1 as tile is active 
+                            // alpha set to 1 as tile is active
                             worldHandle.DrawTextureRect(
                                 _heatGradientTexture,
                                 Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector * ShaderSpilling),
-                                new Color(strength, 0f, 0f, 1.0f));
+                                new Color(strength, 0f, 0f));
                         }
                     }
                 }
@@ -226,20 +226,20 @@ public sealed class GasTileHeatBlurOverlay : Overlay
 
     private float GetHeatDistortionStrength(ThermalByte temp)
     {
-        if (!temp.TryGetTemperature(out var kelvinTemp, true))
+        if (!temp.TryGetTemperature(out var kelvinTemp))
         {
             return 0f;
         }
 
-        float strength = (kelvinTemp - MinDistortionTemp) / (MaxDistortionTemp - MinDistortionTemp);
+        var strength = (kelvinTemp - MinDistortionTemp) / (MaxDistortionTemp - MinDistortionTemp);
 
         return MathHelper.Clamp01(strength);
     }
 
     internal sealed class CachedResources : IDisposable
     {
-        public IRenderTexture HeatTarget = default!;
-        public IRenderTexture HeatBlurTarget = default!;
+        public IRenderTexture? HeatTarget;
+        public IRenderTexture? HeatBlurTarget;
 
         public void Dispose()
         {
