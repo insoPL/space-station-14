@@ -1,0 +1,10 @@
+<BoxContainer
+    xmlns="https://spacestation14.io"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Class="Content.Client.Shuttles.UI.ShuttleConfigControl"
+    Orientation="Vertical">
+
+    <Label Text="Shuttle Configuration" HorizontalAlignment="Center" />
+    <Button Name="SaveButton" Text="Save Configuration" />
+
+</BoxContainer>

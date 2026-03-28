@@ -29,6 +29,12 @@
                     VerticalExpand="True"
                     Text="DOCK"
                     Margin="5"/>
+            <Button Name="ConfigModeButton"
+                    ToggleMode="True"
+                    HorizontalExpand="True"
+                    VerticalExpand="True"
+                    Text="CONFIG"
+                    Margin="5"/>
         </BoxContainer>
         <!-- Contents box -->
         <BoxContainer Name="Contents"
@@ -38,6 +44,7 @@
             <ui:NavScreen Name="NavContainer" Visible="False"/>
             <ui:MapScreen Name="MapContainer" Visible="False"/>
             <ui:DockingScreen Name="DockContainer" Visible="False"/>
+            <!--ui:ConfigScreen Name="ConfigContainer" Visible="False"/-->
         </BoxContainer>
     </BoxContainer>
 </controls:FancyWindow>
