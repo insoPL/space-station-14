@@ -43,10 +43,12 @@ public sealed class GasTileHeatBlurOverlay : Overlay
     private readonly OverlayResourceCache<CachedResources> _resources = new();
 
     // Overlay settings
-    private const float ShaderSpilling = 2.5f;  // for example 4f - spills shader one tile from hotspot, 2.5f - spills it half tile
-    private const float ShaderStrength = 0.04f;  // Makes waves stronger
-    private const float ShaderScale = 1f;  // Makes more waves
-    private const float ShaderSpeed = 0.4f;  // Makes waves run faster
+    private const float
+        ShaderSpilling = 2.5f; // for example 4f - spills shader one tile from hotspot, 2.5f - spills it half tile
+
+    private const float ShaderStrength = 0.04f; // Makes waves stronger
+    private const float ShaderScale = 1f; // Makes more waves
+    private const float ShaderSpeed = 0.4f; // Makes waves run faster
 
     // Overlay settings for reduced motion setting
     private const float ShaderStrengthForReducedMotion = 0.01f;
@@ -95,6 +97,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                 new RenderTargetFormatParameters(RenderTargetColorFormat.Rgba8Srgb),
                 name: nameof(GasTileHeatBlurOverlaySystem));
         }
+
         if (res.HeatBlurTarget?.Texture.Size != target.Size)
         {
             res.HeatBlurTarget?.Dispose();
@@ -181,7 +184,8 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                             // alpha set to 1 as tile is active
                             worldHandle.DrawTextureRect(
                                 _heatGradientTexture,
-                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector, grid.Comp.TileSizeVector * ShaderSpilling),
+                                Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector,
+                                    grid.Comp.TileSizeVector * ShaderSpilling),
                                 new Color(strength, 0f, 0f));
                         }
                     }
@@ -226,7 +230,14 @@ public sealed class GasTileHeatBlurOverlay : Overlay
         base.DisposeBehavior();
     }
 
-    private float GetHeatDistortionStrength(ThermalByte temp)
+    /// <summary>
+    /// Gets the strength of the heat distortion effect based on the temperature of the tile.
+    /// The strength is a value between 0 and 1, where 0 means no distortion and 1 means maximum distortion.
+    /// </summary>
+    /// <param name="temp">The temperature of the tile.</param>
+    /// <returns>The strength of the heat distortion effect.</returns>
+    /// <seealso cref="ThermalByte"/>
+    private static float GetHeatDistortionStrength(ThermalByte temp)
     {
         if (!temp.TryGetTemperature(out var kelvinTemp))
         {
