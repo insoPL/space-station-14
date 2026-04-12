@@ -1,4 +1,3 @@
-using Content.Server.Atmos.EntitySystems;
 using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
@@ -6,7 +5,6 @@ using Robust.Shared.GameObjects;
 using Robust.Shared.Map;
 using Robust.Shared.Maths;
 using Robust.Shared.Utility;
-using System.Linq;
 using System.Numerics;
 
 namespace Content.IntegrationTests.Tests.Atmos;
