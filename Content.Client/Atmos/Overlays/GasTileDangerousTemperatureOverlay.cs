@@ -200,13 +200,13 @@ public sealed class GasTileDangerousTemperatureOverlay : Overlay
                     foreach (var chunk in comp.Chunks.Values)
                     {
                         var enumerator = new GasChunkEnumerator(chunk);
-                        while (enumerator.MoveNext(out var tileGas))
+                        while (enumerator.MoveNext(out var tileFire, out var tileVisibleGas, out var tileGasTemperature))
                         {
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);
                             if (!localBounds.Contains(tilePosition))
                                 continue;
 
-                            var gasColor = _colorCache[tileGas.ByteGasTemperature.Value];
+                            var gasColor = _colorCache[tileGasTemperature.ByteGasTemperature.Value];
 
                             if (gasColor.A <= 0f)
                                 continue;

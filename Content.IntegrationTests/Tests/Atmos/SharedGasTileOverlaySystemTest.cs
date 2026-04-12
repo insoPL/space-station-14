@@ -76,7 +76,7 @@ public sealed class GasTileOverlayTemperatureNetworkingTest : AtmosTest
             var localY = MathHelper.Mod(indices.Y, SharedGasTileOverlaySystem.ChunkSize);
             int tileIndex = localX + localY * SharedGasTileOverlaySystem.ChunkSize;
 
-            var tile = chunk.TileData[tileIndex];
+            var tile = chunk.TileGasTemperatureData[tileIndex];
             tile.ByteGasTemperature.TryGetTemperature(out var actualTemp);
 
             Assert.That(actualTemp, Is.EqualTo(expectedTemp).Within(0.01f), $"Tile at {indices} had wrong temperature!");

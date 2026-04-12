@@ -16,7 +16,9 @@ namespace Content.Shared.Atmos
         public readonly Vector2i Index;
         public readonly Vector2i Origin;
 
-        public GasOverlayData[] TileData = new GasOverlayData[ChunkSize * ChunkSize];
+        public SharedFireData[] TileFireData = new SharedFireData[ChunkSize * ChunkSize];
+        public SharedVisibleGasData[] TileVisibleGasData = new SharedVisibleGasData[ChunkSize * ChunkSize];
+        public SharedGasTemperatureData[] TileGasTemperatureData = new SharedGasTemperatureData[ChunkSize * ChunkSize];
 
         [NonSerialized]
         public GameTick LastUpdate;
@@ -34,7 +36,9 @@ namespace Content.Shared.Atmos
 
             // This does not clone the opacity array. However, this chunk cloning is only used by the client,
             // which never modifies that directly. So this should be fine.
-            Array.Copy(data.TileData, TileData, data.TileData.Length);
+            Array.Copy(data.TileFireData, TileFireData, data.TileFireData.Length);
+            Array.Copy(data.TileVisibleGasData, TileVisibleGasData, data.TileVisibleGasData.Length);
+            Array.Copy(data.TileGasTemperatureData, TileGasTemperatureData, data.TileGasTemperatureData.Length);
         }
 
         /// <summary>
@@ -57,7 +61,9 @@ namespace Content.Shared.Atmos
 
     public struct GasChunkEnumerator
     {
-        private readonly GasOverlayData[] _tileData;
+        private readonly SharedFireData[] _tileFireData;
+        private readonly SharedVisibleGasData[] _tileVisibleGasData;
+        private readonly SharedGasTemperatureData[] _tileGasTemperatureData;
         private int _index = -1;
 
         public int X = ChunkSize - 1;
@@ -65,12 +71,14 @@ namespace Content.Shared.Atmos
 
         public GasChunkEnumerator(GasOverlayChunk chunk)
         {
-            _tileData = chunk.TileData;
+            _tileFireData = chunk.TileFireData;
+            _tileVisibleGasData = chunk.TileVisibleGasData;
+            _tileGasTemperatureData = chunk.TileGasTemperatureData;
         }
 
-        public bool MoveNext(out GasOverlayData gas)
+        public bool MoveNext(out SharedFireData fire, out SharedVisibleGasData visibleGas, out SharedGasTemperatureData temperature)
         {
-            while (++_index < _tileData.Length)
+            while (++_index < _tileFireData.Length)
             {
                 X += 1;
                 if (X >= ChunkSize)
@@ -79,12 +87,22 @@ namespace Content.Shared.Atmos
                     Y += 1;
                 }
 
-                gas = _tileData[_index];
-                if (!gas.Equals(default))
+                // Grab the data from all three arrays at the current index
+                fire = _tileFireData[_index];
+                visibleGas = _tileVisibleGasData[_index];
+                temperature = _tileGasTemperatureData[_index];
+
+                // If ANY of the data structs are not default, we have valid data to yield for this tile
+                if (!fire.Equals(default) || !visibleGas.Equals(default) || !temperature.Equals(default))
+                {
                     return true;
+                }
             }
 
-            gas = default;
+            // Reset out parameters if we've reached the end of the chunk
+            fire = default;
+            visibleGas = default;
+            temperature = default;
             return false;
         }
     }

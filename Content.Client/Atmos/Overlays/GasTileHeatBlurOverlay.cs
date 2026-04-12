@@ -166,7 +166,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                     {
                         var enumerator = new GasChunkEnumerator(chunk);
 
-                        while (enumerator.MoveNext(out var tileGas))
+                        while (enumerator.MoveNext(out var sharedFireData, out var sharedVisibleGasData, out var sharedGasTemperatureData))
                         {
                             // Check and make sure the tile is within the viewport/screen
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);
@@ -174,7 +174,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                                 continue;
 
                             // Get the distortion strength from the temperature and bail if it's not hot enough
-                            var strength = GetHeatDistortionStrength(tileGas.ByteGasTemperature);
+                            var strength = GetHeatDistortionStrength(sharedGasTemperatureData.ByteGasTemperature);
                             if (strength <= 0f)
                                 continue;
 

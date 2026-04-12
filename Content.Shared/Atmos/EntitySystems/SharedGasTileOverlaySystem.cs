@@ -65,32 +65,34 @@ public abstract class SharedGasTileOverlaySystem : EntitySystem
     }
 
     [Serializable, NetSerializable]
-    public readonly struct GasOverlayData : IEquatable<GasOverlayData>
+    public readonly struct SharedFireData : IEquatable<SharedFireData>
     {
         [ViewVariables] public readonly byte FireState;
-        [ViewVariables] public readonly byte[] Opacity;
         // TODO change fire color based on ByteTemp
 
-        /// <summary>
-        /// Network-synced air temperature, compressed to a single byte per tile for bandwidth optimization.
-        /// Note: Values are approximate and may deviate even ~10°C from the precise server side only temperature.
-        /// </summary>
-        [ViewVariables]
-        public readonly ThermalByte ByteGasTemperature;
-
-
-        public GasOverlayData(byte fireState, byte[] opacity, ThermalByte byteTemp)
+        public SharedFireData(byte fireState)
         {
             FireState = fireState;
-            Opacity = opacity;
-            ByteGasTemperature = byteTemp;
         }
 
-        public bool Equals(GasOverlayData other)
+        public bool Equals(SharedFireData other)
         {
-            if (FireState != other.FireState)
-                return false;
+            return FireState == other.FireState;
+        }
+    }
 
+    [Serializable, NetSerializable]
+    public readonly struct SharedVisibleGasData : IEquatable<SharedVisibleGasData>
+    {
+        [ViewVariables] public readonly byte[] Opacity;
+
+        public SharedVisibleGasData(byte[] opacity)
+        {
+            Opacity = opacity;
+        }
+
+        public bool Equals(SharedVisibleGasData other)
+        {
             if (Opacity?.Length != other.Opacity?.Length)
                 return false;
 
@@ -103,10 +105,28 @@ public abstract class SharedGasTileOverlaySystem : EntitySystem
                 }
             }
 
-            if (ByteGasTemperature != other.ByteGasTemperature)
-                return false;
-
             return true;
+        }
+    }
+
+    [Serializable, NetSerializable]
+    public readonly struct SharedGasTemperatureData : IEquatable<SharedGasTemperatureData>
+    {
+        /// <summary>
+        /// Network-synced air temperature, compressed to a single byte per tile for bandwidth optimization.
+        /// Note: Values are approximate and may deviate even ~10°C from the precise server side only temperature.
+        /// </summary>
+        [ViewVariables]
+        public readonly ThermalByte ByteGasTemperature;
+
+        public SharedGasTemperatureData(ThermalByte byteTemp)
+        {
+            ByteGasTemperature = byteTemp;
+        }
+
+        public bool Equals(SharedGasTemperatureData other)
+        {
+            return ByteGasTemperature == other.ByteGasTemperature;
         }
     }
 

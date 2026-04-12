@@ -12,6 +12,7 @@ using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using System.Numerics;
+using static Content.Shared.Atmos.EntitySystems.SharedGasTileOverlaySystem;
 
 namespace Content.Client.Atmos.Overlays;
 
@@ -148,16 +149,16 @@ public sealed class GasTileFireOverlay : Overlay
                 {
                     var enumerator = new GasChunkEnumerator(chunk);
 
-                    while (enumerator.MoveNext(out var gas))
+                    while (enumerator.MoveNext(out var fire, out var _, out var _))
                     {
-                        if (gas.FireState == 0)
+                        if (fire.FireState == 0)
                             continue;
 
                         var index = chunk.Origin + (enumerator.X, enumerator.Y);
                         if (!localBounds.Contains(index))
                             continue;
 
-                        var fireState = gas.FireState - 1;
+                        var fireState = fire.FireState - 1;
                         var texture = state.frames[fireState][state.frameCounter[fireState]];
                         state.drawHandle.DrawTexture(texture, index);
                     }
