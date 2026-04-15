@@ -15,14 +15,14 @@ public abstract partial class SharedMapAtmosphereComponent : Component
 [Serializable, NetSerializable]
 public sealed class MapAtmosphereComponentState : ComponentState
 {
-    public SharedGasTileOverlaySystem.SharedFireData FireOverlay;
-    public SharedGasTileOverlaySystem.SharedVisibleGasData VisibleGasOverlay;
-    public SharedGasTileOverlaySystem.SharedGasTemperatureData GasTemperatureOverlay;
+    public SharedGasTileOverlaySystem.SharedFireData SharedFireData;
+    public SharedGasTileOverlaySystem.SharedVisibleGasData SharedVisibleGasData;
+    public SharedGasTileOverlaySystem.SharedGasTemperatureData SharedGasTemperatureData;
 
-    public MapAtmosphereComponentState(SharedGasTileOverlaySystem.SharedFireData fireOverlay, SharedGasTileOverlaySystem.SharedVisibleGasData visibleGasOverlay, SharedGasTileOverlaySystem.SharedGasTemperatureData gasTemperatureOverlay)
+    public MapAtmosphereComponentState(SharedGasTileOverlaySystem.SharedFireData sharedFireData, SharedGasTileOverlaySystem.SharedVisibleGasData sharedVisibleGasData, SharedGasTileOverlaySystem.SharedGasTemperatureData sharedGasTemperatureData)
     {
-        FireOverlay = fireOverlay;
-        VisibleGasOverlay = visibleGasOverlay;
-        GasTemperatureOverlay = gasTemperatureOverlay;
+        SharedFireData = sharedFireData;
+        SharedVisibleGasData = sharedVisibleGasData;
+        SharedGasTemperatureData = sharedGasTemperatureData;
     }
 }

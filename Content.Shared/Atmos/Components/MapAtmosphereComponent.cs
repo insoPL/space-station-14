@@ -20,7 +20,7 @@ public sealed partial class MapAtmosphereComponent : SharedMapAtmosphereComponen
     [DataField]
     public bool Space = true;
 
-    public SharedGasTileOverlaySystem.SharedFireData FireOverlay;
-    public SharedGasTileOverlaySystem.SharedVisibleGasData VisibleGasOverlay;
-    public SharedGasTileOverlaySystem.SharedGasTemperatureData GasTemperatureOverlay;
+    public SharedGasTileOverlaySystem.SharedFireData SharedFireData;
+    public SharedGasTileOverlaySystem.SharedVisibleGasData SharedVisibleGasData;
+    public SharedGasTileOverlaySystem.SharedGasTemperatureData SharedGasTemperatureData;
 }

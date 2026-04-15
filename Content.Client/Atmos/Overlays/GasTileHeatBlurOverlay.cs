@@ -166,7 +166,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                     {
                         var enumerator = new GasChunkEnumerator(chunk);
 
-                        while (enumerator.MoveNext(out var sharedFireData, out var sharedVisibleGasData, out var sharedGasTemperatureData))
+                        while (enumerator.MoveNext(out var _, out var _, out var sharedGasTemperatureData))
                         {
                             // Check and make sure the tile is within the viewport/screen
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);

@@ -181,7 +181,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
                 {
                     var enumerator = new GasChunkEnumerator(chunk);
 
-                    while (enumerator.MoveNext(out var sharedFireData, out var sharedVisibleGasData, out var sharedGasTemperatureData))
+                    while (enumerator.MoveNext(out var _, out var sharedVisibleGasData, out var _))
                     {
                         if (sharedVisibleGasData.Opacity == null!)
                             continue;
@@ -235,9 +235,9 @@ public sealed class GasTileVisibleGasOverlay : Overlay
             {
                 var tilePosition = new Vector2(x, y);
 
-                for (var i = 0; i < atmos.VisibleGasOverlay.Opacity.Length; i++)
+                for (var i = 0; i < atmos.VisibleGasData.Opacity.Length; i++)
                 {
-                    var opacity = atmos.VisibleGasOverlay.Opacity[i];
+                    var opacity = atmos.VisibleGasData.Opacity[i];
 
                     if (opacity > 0)
                         handle.DrawTexture(_frames[i][_frameCounter[i]], tilePosition, Color.White.WithAlpha(opacity));
