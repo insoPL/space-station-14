@@ -147,9 +147,9 @@ public sealed class GasTileFireOverlay : Overlay
                 state.drawHandle.UseShader(state.shader);
                 foreach (var chunk in comp.Chunks.Values)
                 {
-                    var enumerator = new GasChunkEnumerator(chunk);
+                    var enumerator = new GasChunkDataEnumerator<SharedFireData>(chunk.TileFireData);
 
-                    while (enumerator.MoveNext(out var fire, out var _, out var _))
+                    while (enumerator.MoveNext(out var fire))
                     {
                         if (fire.FireState == 0)
                             continue;

@@ -13,6 +13,7 @@ using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 using System.Numerics;
+using static Content.Shared.Atmos.EntitySystems.SharedGasTileOverlaySystem;
 using Color = Robust.Shared.Maths.Color;
 using Texture = Robust.Client.Graphics.Texture;
 
@@ -164,9 +165,9 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                     // for each tile and its gas --->
                     foreach (var chunk in comp.Chunks.Values)
                     {
-                        var enumerator = new GasChunkEnumerator(chunk);
+                        var enumerator = new GasChunkDataEnumerator<SharedGasTemperatureData>(chunk.TileGasTemperatureData);
 
-                        while (enumerator.MoveNext(out var _, out var _, out var sharedGasTemperatureData))
+                        while (enumerator.MoveNext(out var sharedGasTemperatureData))
                         {
                             // Check and make sure the tile is within the viewport/screen
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);

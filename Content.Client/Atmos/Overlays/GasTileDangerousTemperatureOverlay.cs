@@ -8,6 +8,7 @@ using Robust.Shared.Enums;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using System.Numerics;
+using static Content.Shared.Atmos.EntitySystems.SharedGasTileOverlaySystem;
 
 namespace Content.Client.Atmos.Overlays;
 
@@ -199,8 +200,8 @@ public sealed class GasTileDangerousTemperatureOverlay : Overlay
 
                     foreach (var chunk in comp.Chunks.Values)
                     {
-                        var enumerator = new GasChunkEnumerator(chunk);
-                        while (enumerator.MoveNext(out var _, out var _, out var sharedGasTemperature))
+                        var enumerator = new GasChunkDataEnumerator<SharedGasTemperatureData>(chunk.TileGasTemperatureData);
+                        while (enumerator.MoveNext(out var sharedGasTemperature))
                         {
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);
                             if (!localBounds.Contains(tilePosition))

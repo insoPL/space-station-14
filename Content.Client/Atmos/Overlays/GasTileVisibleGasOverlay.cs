@@ -13,6 +13,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 using System.Numerics;
+using static Content.Shared.Atmos.EntitySystems.SharedGasTileOverlaySystem;
 using DrawDepth = Content.Shared.DrawDepth.DrawDepth;
 
 namespace Content.Client.Atmos.Overlays;
@@ -179,9 +180,9 @@ public sealed class GasTileVisibleGasOverlay : Overlay
                 state.drawHandle.UseShader(null);
                 foreach (var chunk in comp.Chunks.Values)
                 {
-                    var enumerator = new GasChunkEnumerator(chunk);
+                    var enumerator = new GasChunkDataEnumerator<SharedVisibleGasData>(chunk.TileVisibleGasData);
 
-                    while (enumerator.MoveNext(out var _, out var sharedVisibleGasData, out var _))
+                    while (enumerator.MoveNext(out var sharedVisibleGasData))
                     {
                         if (sharedVisibleGasData.Opacity == null!)
                             continue;

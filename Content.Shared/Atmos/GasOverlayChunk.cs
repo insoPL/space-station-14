@@ -59,26 +59,22 @@ namespace Content.Shared.Atmos
         }
     }
 
-    public struct GasChunkEnumerator
+    public struct GasChunkDataEnumerator<T> where T : struct, IEquatable<T>
     {
-        private readonly SharedFireData[] _tileFireData;
-        private readonly SharedVisibleGasData[] _tileVisibleGasData;
-        private readonly SharedGasTemperatureData[] _tileGasTemperatureData;
+        private readonly T[] _data;
         private int _index = -1;
 
         public int X = ChunkSize - 1;
         public int Y = -1;
 
-        public GasChunkEnumerator(GasOverlayChunk chunk)
+        public GasChunkDataEnumerator(T[] data)
         {
-            _tileFireData = chunk.TileFireData;
-            _tileVisibleGasData = chunk.TileVisibleGasData;
-            _tileGasTemperatureData = chunk.TileGasTemperatureData;
+            _data = data;
         }
 
-        public bool MoveNext(out SharedFireData fire, out SharedVisibleGasData visibleGas, out SharedGasTemperatureData temperature)
+        public bool MoveNext(out T item)
         {
-            while (++_index < _tileFireData.Length)
+            while (++_index < _data.Length)
             {
                 X += 1;
                 if (X >= ChunkSize)
@@ -87,19 +83,15 @@ namespace Content.Shared.Atmos
                     Y += 1;
                 }
 
-                fire = _tileFireData[_index];
-                visibleGas = _tileVisibleGasData[_index];
-                temperature = _tileGasTemperatureData[_index];
+                item = _data[_index];
 
-                if (!fire.Equals(default) || !visibleGas.Equals(default) || !temperature.Equals(default))
+                if (!item.Equals(default))
                 {
                     return true;
                 }
             }
 
-            fire = default;
-            visibleGas = default;
-            temperature = default;
+            item = default;
             return false;
         }
     }
