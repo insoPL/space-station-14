@@ -149,16 +149,16 @@ public sealed class GasTileFireOverlay : Overlay
                 {
                     var enumerator = new GasChunkDataEnumerator<SharedFireData>(chunk.TileFireData);
 
-                    while (enumerator.MoveNext(out var fire))
+                    while (enumerator.MoveNext(out var sharedFireData))
                     {
-                        if (fire.FireState == 0)
+                        if (sharedFireData.FireState == 0)
                             continue;
 
                         var index = chunk.Origin + (enumerator.X, enumerator.Y);
                         if (!localBounds.Contains(index))
                             continue;
 
-                        var fireState = fire.FireState - 1;
+                        var fireState = sharedFireData.FireState - 1;
                         var texture = state.frames[fireState][state.frameCounter[fireState]];
                         state.drawHandle.DrawTexture(texture, index);
                     }
