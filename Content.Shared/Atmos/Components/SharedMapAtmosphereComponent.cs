@@ -7,9 +7,9 @@ namespace Content.Shared.Atmos.Components;
 [NetworkedComponent]
 public abstract partial class SharedMapAtmosphereComponent : Component
 {
-    [ViewVariables] public SharedGasTileOverlaySystem.SharedFireData FireOverlay;
-    [ViewVariables] public SharedGasTileOverlaySystem.SharedVisibleGasData VisibleGasOverlay;
-    [ViewVariables] public SharedGasTileOverlaySystem.SharedGasTemperatureData GasTemperatureOverlay;
+    [ViewVariables] public SharedGasTileOverlaySystem.SharedFireData FireData;
+    [ViewVariables] public SharedGasTileOverlaySystem.SharedVisibleGasData VisibleGasData;
+    [ViewVariables] public SharedGasTileOverlaySystem.SharedGasTemperatureData GasTemperatureData;
 }
 
 [Serializable, NetSerializable]

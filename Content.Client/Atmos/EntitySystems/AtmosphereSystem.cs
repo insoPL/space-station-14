@@ -18,8 +18,8 @@ public sealed partial class AtmosphereSystem : SharedAtmosphereSystem
             return;
 
         // Struct so should just copy by value.
-        component.SharedFireData = state.NetworkedFireData;
+        component.SharedFireData = state.SharedFireData;
         component.SharedVisibleGasData = state.SharedVisibleGasData;
-        component.SharedGasTemperatureData = state.GasTemperatureOverlay;
+        component.SharedGasTemperatureData = state.SharedGasTemperatureData;
     }
 }

@@ -87,24 +87,20 @@ namespace Content.Shared.Atmos
                     Y += 1;
                 }
 
-                // Grab the data from all three arrays at the current index
                 fire = _tileFireData[_index];
                 visibleGas = _tileVisibleGasData[_index];
                 temperature = _tileGasTemperatureData[_index];
 
-                // If ANY of the data structs are not default, we have valid data to yield for this tile
                 if (!fire.Equals(default) || !visibleGas.Equals(default) || !temperature.Equals(default))
                 {
                     return true;
                 }
             }
 
-            // Reset out parameters if we've reached the end of the chunk
             fire = default;
             visibleGas = default;
             temperature = default;
             return false;
         }
     }
-
 }
