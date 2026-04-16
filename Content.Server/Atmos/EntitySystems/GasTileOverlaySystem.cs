@@ -196,10 +196,7 @@ namespace Content.Server.Atmos.EntitySystems
                     continue;
                 }
 
-                opacity[i] = (byte)(ContentHelpers.RoundToLevels(
-                    MathHelper.Clamp01((moles - gas.GasMolesVisible) /
-                                       (gas.GasMolesVisibleMax - gas.GasMolesVisible)) * 255, byte.MaxValue,
-                    _thresholds) * 255 / (_thresholds - 1));
+                opacity[i] = GetOpacity(moles, gas.GasMolesVisible, gas.GasMolesVisibleMax);
             }
 
             return new SharedVisibleGasData(opacity);
