@@ -180,7 +180,7 @@ public sealed class GasTileVisibleGasOverlay : Overlay
                 state.drawHandle.UseShader(null);
                 foreach (var chunk in comp.Chunks.Values)
                 {
-                    var enumerator = new GasChunkDataEnumerator<SharedVisibleGasData>(chunk.TileVisibleGasData);
+                    var enumerator = new GasChunkEnumerator<SharedVisibleGasData>(chunk.TileVisibleGasData);
 
                     while (enumerator.MoveNext(out var sharedVisibleGasData))
                     {

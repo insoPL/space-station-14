@@ -165,7 +165,7 @@ public sealed class GasTileHeatBlurOverlay : Overlay
                     // for each tile and its gas --->
                     foreach (var chunk in comp.Chunks.Values)
                     {
-                        var enumerator = new GasChunkDataEnumerator<SharedGasTemperatureData>(chunk.TileGasTemperatureData);
+                        var enumerator = new GasChunkEnumerator<SharedGasTemperatureData>(chunk.TileGasTemperatureData);
 
                         while (enumerator.MoveNext(out var sharedGasTemperatureData))
                         {

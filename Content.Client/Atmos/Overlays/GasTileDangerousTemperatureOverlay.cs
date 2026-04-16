@@ -200,7 +200,7 @@ public sealed class GasTileDangerousTemperatureOverlay : Overlay
 
                     foreach (var chunk in comp.Chunks.Values)
                     {
-                        var enumerator = new GasChunkDataEnumerator<SharedGasTemperatureData>(chunk.TileGasTemperatureData);
+                        var enumerator = new GasChunkEnumerator<SharedGasTemperatureData>(chunk.TileGasTemperatureData);
                         while (enumerator.MoveNext(out var sharedGasTemperature))
                         {
                             var tilePosition = chunk.Origin + (enumerator.X, enumerator.Y);

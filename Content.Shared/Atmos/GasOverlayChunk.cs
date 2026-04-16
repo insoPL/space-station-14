@@ -59,22 +59,22 @@ namespace Content.Shared.Atmos
         }
     }
 
-    public struct GasChunkDataEnumerator<T> where T : struct, IEquatable<T>
+    public struct GasChunkEnumerator<T> where T : struct, IEquatable<T>
     {
-        private readonly T[] _data;
+        private readonly T[] _tileData;
         private int _index = -1;
 
         public int X = ChunkSize - 1;
         public int Y = -1;
 
-        public GasChunkDataEnumerator(T[] data)
+        public GasChunkEnumerator(T[] data)
         {
-            _data = data;
+            _tileData = data;
         }
 
-        public bool MoveNext(out T item)
+        public bool MoveNext(out T gas)
         {
-            while (++_index < _data.Length)
+            while (++_index < _tileData.Length)
             {
                 X += 1;
                 if (X >= ChunkSize)
@@ -83,15 +83,13 @@ namespace Content.Shared.Atmos
                     Y += 1;
                 }
 
-                item = _data[_index];
+                gas = _tileData[_index];
 
-                if (!item.Equals(default))
-                {
+                if (!gas.Equals(default))
                     return true;
-                }
             }
 
-            item = default;
+            gas = default;
             return false;
         }
     }
