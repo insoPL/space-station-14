@@ -1,4 +1,4 @@
-﻿using Content.Shared.Whitelist;
+using Content.Shared.Whitelist;
 using JetBrains.Annotations;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
@@ -137,6 +137,12 @@ public sealed partial class MaterialReclaimerComponent : Component
     /// </remarks>
     [DataField, AutoNetworkedField]
     public int ItemsProcessed;
+
+    /// <summary>
+    /// Maintained hashset of entities currently passing through the recycler.
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public HashSet<EntityUid> CollideExceptions = new();
 }
 
 [NetSerializable, Serializable]

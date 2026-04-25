@@ -1,4 +1,3 @@
-using System.Linq;
 using Content.Shared.Administration.Logs;
 using Content.Shared.Audio;
 using Content.Shared.Body;
@@ -6,6 +5,7 @@ using Content.Shared.Database;
 using Content.Shared.Emag.Systems;
 using Content.Shared.Examine;
 using Content.Shared.Mobs.Components;
+using Content.Shared.Movement.Pulling.Systems;
 using Content.Shared.Stacks;
 using Content.Shared.Whitelist;
 using Robust.Shared.Audio.Systems;
@@ -13,6 +13,7 @@ using Robust.Shared.Containers;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Events;
 using Robust.Shared.Timing;
+using System.Linq;
 
 namespace Content.Shared.Materials;
 
@@ -29,6 +30,8 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
     [Dependency] protected readonly SharedContainerSystem Container = default!;
     [Dependency] private readonly EntityWhitelistSystem _whitelistSystem = default!;
     [Dependency] private readonly EmagSystem _emag = default!;
+    [Dependency] private readonly SharedTransformSystem _transform = default!;
+    [Dependency] private readonly PullingSystem _pulling = default!;
 
     public const string ActiveReclaimerContainerId = "active-material-reclaimer-container";
 
@@ -41,6 +44,8 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
         SubscribeLocalEvent<MaterialReclaimerComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<CollideMaterialReclaimerComponent, StartCollideEvent>(OnCollide);
         SubscribeLocalEvent<ActiveMaterialReclaimerComponent, ComponentStartup>(OnActiveStartup);
+        SubscribeLocalEvent<MaterialReclaimerComponent, PreventCollideEvent>(OnPreventCollide);
+        SubscribeLocalEvent<MaterialReclaimerComponent, EndCollideEvent>(OnEndCollide);
     }
 
     private void OnMapInit(EntityUid uid, MaterialReclaimerComponent component, MapInitEvent args)
@@ -99,6 +104,9 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
 
         if (_whitelistSystem.IsWhitelistFail(component.Whitelist, item) ||
             _whitelistSystem.IsWhitelistPass(component.Blacklist, item))
+            return false;
+
+        if (!CanPassDirection((uid, component), item))
             return false;
 
         if (Container.TryGetContainingContainer((item, null, null), out _) && !Container.TryRemoveFromContainer(item))
@@ -252,6 +260,67 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
                 continue;
             TryFinishProcessItem(uid, reclaimer, active);
         }
+    }
+
+    private void OnPreventCollide(Entity<MaterialReclaimerComponent> ent, ref PreventCollideEvent args)
+    {
+        if (args.Cancelled || !args.OurFixture.Hard || !args.OtherFixture.Hard)
+            return;
+
+        if (ent.Comp.CollideExceptions.Contains(args.OtherEntity))
+        {
+            args.Cancelled = true;
+            return;
+        }
+
+        // We need to add this in here too for chain pulls
+        if (_pulling.GetPuller(args.OtherEntity) is { } puller && ent.Comp.CollideExceptions.Contains(puller))
+        {
+            ent.Comp.CollideExceptions.Add(args.OtherEntity);
+            Dirty(ent);
+            args.Cancelled = true;
+            return;
+        }
+
+        if (CanPassDirection(ent, args.OtherEntity))
+        {
+            ent.Comp.CollideExceptions.Add(args.OtherEntity);
+            if (_pulling.GetPulling(args.OtherEntity) is { } uid)
+                ent.Comp.CollideExceptions.Add(uid);
+
+            args.Cancelled = true;
+            Dirty(ent);
+        }
+    }
+
+    private void OnEndCollide(Entity<MaterialReclaimerComponent> ent, ref EndCollideEvent args)
+    {
+        if (!args.OurFixture.Hard)
+        {
+            ent.Comp.CollideExceptions.Remove(args.OtherEntity);
+            Dirty(ent);
+        }
+    }
+
+    private bool CanPassDirection(Entity<MaterialReclaimerComponent> ent, EntityUid other)
+    {
+        var xform = Transform(ent);
+        var otherXform = Transform(other);
+
+        var (pos, rot) = _transform.GetWorldPositionRotation(xform);
+        var otherPos = _transform.GetWorldPosition(otherXform);
+
+        var approachAngle = (pos - otherPos).ToAngle();
+        var rotateAngle = rot.ToWorldVec().ToAngle();
+
+        var diff = Math.Abs(approachAngle - rotateAngle);
+        diff %= MathHelper.TwoPi;
+        if (diff > Math.PI)
+            diff = MathHelper.TwoPi - diff;
+
+        // Accept if within 45 degrees of the front (Math.PI / 4) 
+        // OR within 45 degrees of the back (3 * Math.PI / 4)
+        return diff < Math.PI / 4 || diff > 3 * Math.PI / 4;
     }
 }
 
