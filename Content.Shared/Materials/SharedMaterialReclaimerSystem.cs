@@ -182,8 +182,9 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
     }
 
     /// <summary>
-    /// Sets the Enabled field on the reclaimer.
+    /// Enables or disables the material reclaimer. 
     /// </summary>
+    /// <param name="enabled">Whether the reclaimer should be enabled or disabled.</param>
     public bool SetReclaimerEnabled(EntityUid uid, bool enabled, MaterialReclaimerComponent? component = null)
     {
         if (!Resolve(uid, ref component, false))
@@ -318,9 +319,7 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
         if (diff > Math.PI)
             diff = MathHelper.TwoPi - diff;
 
-        // Accept if within 45 degrees of the front (Math.PI / 4) 
-        // OR within 45 degrees of the back (3 * Math.PI / 4)
-        return diff < Math.PI / 4 || diff > 3 * Math.PI / 4;
+        return diff < Math.PI / 4;
     }
 }
 
