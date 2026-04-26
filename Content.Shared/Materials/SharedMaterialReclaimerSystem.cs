@@ -1,11 +1,18 @@
 using Content.Shared.Administration.Logs;
 using Content.Shared.Audio;
 using Content.Shared.Body;
+using Content.Shared.Chemistry.Components;
+using Content.Shared.Chemistry.Components.SolutionManager;
+using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Construction.EntitySystems;
 using Content.Shared.Database;
 using Content.Shared.Emag.Systems;
 using Content.Shared.Examine;
+using Content.Shared.Interaction;
+using Content.Shared.Interaction.Events;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Movement.Pulling.Systems;
+using Content.Shared.Nutrition.EntitySystems;
 using Content.Shared.Stacks;
 using Content.Shared.Whitelist;
 using Robust.Shared.Audio.Systems;
@@ -32,6 +39,8 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
     [Dependency] private readonly EmagSystem _emag = default!;
     [Dependency] private readonly SharedTransformSystem _transform = default!;
     [Dependency] private readonly PullingSystem _pulling = default!;
+    [Dependency] private readonly SharedSolutionContainerSystem _solutionContainer = default!;
+    [Dependency] private readonly OpenableSystem _openable = default!;
 
     public const string ActiveReclaimerContainerId = "active-material-reclaimer-container";
 
@@ -46,6 +55,31 @@ public abstract class SharedMaterialReclaimerSystem : EntitySystem
         SubscribeLocalEvent<ActiveMaterialReclaimerComponent, ComponentStartup>(OnActiveStartup);
         SubscribeLocalEvent<MaterialReclaimerComponent, PreventCollideEvent>(OnPreventCollide);
         SubscribeLocalEvent<MaterialReclaimerComponent, EndCollideEvent>(OnEndCollide);
+        SubscribeLocalEvent<MaterialReclaimerComponent, InteractUsingEvent>(OnInteractUsing,
+            before: [typeof(SolutionTransferSystem), typeof(AnchorableSystem)]);
+    }
+
+    private void OnInteractUsing(Entity<MaterialReclaimerComponent> entity, ref InteractUsingEvent args)
+    {
+        if (args.Handled)
+            return;
+
+        // if we're trying to get a solution out of the reclaimer, don't destroy it
+        if (_solutionContainer.TryGetSolution(entity.Owner, entity.Comp.SolutionContainerId, out _, out var outputSolution) && outputSolution.Contents.Any())
+        {
+            if (TryComp<SolutionContainerManagerComponent>(args.Used, out var managerComponent) &&
+                _solutionContainer.EnumerateSolutions((args.Used, managerComponent)).Any(s => s.Solution.Comp.Solution.AvailableVolume > 0))
+            {
+                if (_openable.IsClosed(args.Used))
+                    return;
+
+                if (TryComp<SolutionTransferComponent>(args.Used, out var transfer) &&
+                    transfer.CanReceive)
+                    return;
+            }
+        }
+
+        args.Handled = TryStartProcessItem(entity.Owner, args.Used, entity.Comp, args.User);
     }
 
     private void OnMapInit(EntityUid uid, MaterialReclaimerComponent component, MapInitEvent args)
