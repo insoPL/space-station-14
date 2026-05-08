@@ -1,9 +1,6 @@
-﻿using Content.Server.Atmos.EntitySystems;
-
-namespace Content.Server.Atmos.Components;
+namespace Content.Shared.Atmos.Components;
 
 [RegisterComponent]
-[Access(typeof(BarotraumaSystem))]
 public sealed partial class PressureProtectionComponent : Component
 {
     [DataField]
