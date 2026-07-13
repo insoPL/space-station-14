@@ -5,20 +5,21 @@ using Content.Shared.Verbs;
 
 namespace Content.Shared.Atmos.EntitySystems;
 
-public sealed class PressureProtectionSystem : EntitySystem
+/// <summary>
+///     A system for creating examine verbs for pressure protection clothing.
+/// </summary>
+public sealed partial class PressureProtectionSystem : EntitySystem
 {
-    [Dependency] private readonly ExamineSystemShared _examine = default!;
+    [Dependency] private ExamineSystemShared _examine = default!;
 
-    public override void Initialize()
-    {
-        SubscribeLocalEvent<PressureProtectionComponent, GetVerbsEvent<ExamineVerb>>(OnDetailedExamine);
-    }
+    [SubscribeLocalEvent]
     private void OnDetailedExamine(EntityUid ent, PressureProtectionComponent component, ref GetVerbsEvent<ExamineVerb> args)
     {
         if (!HasComp<ClothingComponent>(ent) || component.LowPressureMultiplier < 1000)
             return;
 
-        var iconTexture = "/Textures/Interface/VerbIcons/zap.svg.192dpi.png";
+        //var iconTexture = "/Textures/Interface/Alerts/pressure.rsi/lowpressure1.png";
+        var iconTexture = "/Textures/Interface/Alerts/pressure.rsi/test.png";
 
         _examine.AddHoverExamineVerb(args,
             component,
