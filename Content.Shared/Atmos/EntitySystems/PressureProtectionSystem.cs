@@ -18,8 +18,7 @@ public sealed partial class PressureProtectionSystem : EntitySystem
         if (!HasComp<ClothingComponent>(ent) || component.LowPressureMultiplier < 1000)
             return;
 
-        //var iconTexture = "/Textures/Interface/Alerts/pressure.rsi/lowpressure1.png";
-        var iconTexture = "/Textures/Interface/Alerts/pressure.rsi/test.png";
+        var iconTexture = "/Textures/Interface/Alerts/PressureProtection/astronaut-helmet.png";
 
         _examine.AddHoverExamineVerb(args,
             component,
