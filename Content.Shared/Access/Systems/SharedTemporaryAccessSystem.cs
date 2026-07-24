@@ -7,18 +7,11 @@ namespace Content.Shared.Access.Systems;
 
 public sealed partial class TemporaryAccessSystem : EntitySystem
 {
-    [Dependency] private readonly IGameTiming _timing = default!;
-    [Dependency] private readonly NameModifierSystem _nameModifier = default!;
-    [Dependency] private readonly SharedAccessSystem _access = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private NameModifierSystem _nameModifier = default!;
+    [Dependency] private SharedAccessSystem _access = default!;
 
-    public override void Initialize()
-    {
-        base.Initialize();
-
-        SubscribeLocalEvent<TemporaryAccessComponent, ExaminedEvent>(OnPriorityExamine);
-        SubscribeLocalEvent<TemporaryAccessComponent, MapInitEvent>(OnPriorityMapInit);
-    }
-
+    [SubscribeLocalEvent]
     private void OnPriorityExamine(Entity<TemporaryAccessComponent> ent, ref ExaminedEvent args)
     {
         var timeLeft = ent.Comp.ExpireTime - _timing.CurTime;
@@ -31,12 +24,14 @@ public sealed partial class TemporaryAccessSystem : EntitySystem
             args.PushMarkup(Loc.GetString("temporary-access-frozen"));
     }
 
+    [SubscribeLocalEvent]
     private void OnPriorityMapInit(Entity<TemporaryAccessComponent> ent, ref MapInitEvent args)
     {
         ent.Comp.ExpireTime = _timing.CurTime + ent.Comp.AccessExpireTime;
 
         Dirty(ent);
     }
+
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
@@ -50,6 +45,7 @@ public sealed partial class TemporaryAccessSystem : EntitySystem
         }
     }
 
+    /// <summary>
     /// Marks an <see cref="TemporaryAccessComponent"/> as expired, disabling the aceesses.
     /// </summary>
     private void ExpireAccess(Entity<TemporaryAccessComponent> ent)
