@@ -1,24 +1,92 @@
-using Content.Shared.GPS.Components;
+using Content.Shared.Access.Components;
+using Content.Shared.CartridgeLoader.Cartridges;
+using Content.Shared.Hands.Components;
+using Content.Shared.Hands.EntitySystems;
+using Robust.Shared.Timing;
 
-namespace Content.Shared.CartridgeLoader.Cartridges;
+namespace Content.Server.CartridgeLoader.Cartridges;
 
 public sealed partial class BadgePrintCartridgeSystem : EntitySystem
 {
-    [Dependency] private CartridgeLoaderSystem _cartridgeLoaderSystem = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
 
     [SubscribeLocalEvent]
-    private void OnCartridgeAdded(Entity<BadgePrintCartridgeComponent> ent, ref CartridgeAddedEvent args)
+    private void OnPrintMessage(EntityUid uid, BadgePrintCartridgeComponent component, BadgePrintUiMessageEvent args)
     {
-        EnsureComp<HandheldGPSComponent>(args.Loader);
+        var badgePrototype = GetDepartmentPrototype(args.Dept);
+        if (badgePrototype == null)
+            return;
+
+        var coords = _transform.GetMapCoordinates(uid);
+        var badge = Spawn(badgePrototype, coords);
+
+        if (TryComp<TemporaryAccessComponent>(badge, out var tempAccess))
+        {
+            var duration = GetTimerSpan(args.Timer);
+            tempAccess.AccessExpireTime = duration;
+            tempAccess.ExpireTime = _timing.CurTime + duration;
+
+            Dirty(badge, tempAccess);
+        }
+
+        var user = GetUserWithHands(uid);
+        if (user != null)
+        {
+            _hands.TryPickupAnyHand(user.Value, badge);
+        }
     }
 
-    [SubscribeLocalEvent]
-    private void OnCartridgeRemoved(Entity<BadgePrintCartridgeComponent> ent, ref CartridgeRemovedEvent args)
+    /// <summary>
+    /// Maps the UI's time enum to actual TimeSpans.
+    /// </summary>
+    private TimeSpan GetTimerSpan(SelectedBadgeTimer timer)
     {
-        // only remove when the program itself is removed
-        if (!_cartridgeLoaderSystem.HasProgram<BadgePrintCartridgeComponent>(args.Loader.AsNullable()))
+        return timer switch
         {
-            RemComp<HandheldGPSComponent>(args.Loader);
+            SelectedBadgeTimer.Print5 => TimeSpan.FromMinutes(5),
+            SelectedBadgeTimer.Print10 => TimeSpan.FromMinutes(10),
+            SelectedBadgeTimer.Print15 => TimeSpan.FromMinutes(15),
+            SelectedBadgeTimer.Print25 => TimeSpan.FromMinutes(25),
+            _ => TimeSpan.FromMinutes(5)
+        };
+    }
+
+    /// <summary>
+    /// Maps the UI's department enum to the prototype IDs defined in access_badge.yml
+    /// </summary>
+    private string? GetDepartmentPrototype(SelectedDepartment dept)
+    {
+        return dept switch
+        {
+            SelectedDepartment.All => "AllAccessAccessBadge",
+            SelectedDepartment.Security => "SecurityAccessBadge",
+            SelectedDepartment.Engineering => "EngineeringAccessBadge",
+            SelectedDepartment.Medical => "MedicalAccessBadge",
+            SelectedDepartment.Science => "ResearchAccessBadge",
+            SelectedDepartment.Cargo => "CargoAccessBadge",
+            SelectedDepartment.Bridge => "CommandAccessBadge",
+            SelectedDepartment.Service => "ServiceAccessBadge",
+            _ => "AccessBadge"
+        };
+    }
+
+    /// <summary>
+    /// Climbs the transform tree from the Cartridge -> PDA -> Player to find their hands.
+    /// </summary>
+    private EntityUid? GetUserWithHands(EntityUid cartridgeUid)
+    {
+        var current = Transform(cartridgeUid).ParentUid;
+
+        while (current.IsValid())
+        {
+            if (HasComp<HandsComponent>(current))
+                return current;
+
+            current = Transform(current).ParentUid;
         }
+
+        return null;
     }
 }
