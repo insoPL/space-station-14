@@ -1,4 +1,4 @@
-﻿- type: entity
+- type: entity
   parent: BaseItem
   id: BasePDACartridge
   abstract: true
@@ -173,3 +173,23 @@
         sprite: Objects/Devices/gps.rsi
         state: icon
     - type: AstroNavCartridge
+
+- type: entity
+  parent: BasePDACartridge
+  id: BadgePrintCartridge
+  name: BadgePrint cartridge
+  description: A program for printing access badge that grants temporary access to departments.
+  components:
+    - type: Sprite
+      state: cart-nav
+    - type: Icon
+      sprite: Objects/Devices/cartridge.rsi
+      state: cart-nav
+    - type: Cartridge
+      programName: badge-print-program-name
+      icon:
+        sprite: Objects/Devices/gps.rsi
+        state: icon
+    - type: BadgePrintCartridge
+    - type: UIFragment
+      ui: !type:BadgePrintUi
