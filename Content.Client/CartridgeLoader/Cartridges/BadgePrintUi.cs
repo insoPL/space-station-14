@@ -34,6 +34,6 @@ public sealed partial class BadgePrintUi : UIFragment
         var printMessage = new BadgePrintUiMessageEvent(timer, department);
         var message = new CartridgeUiMessage(printMessage);
 
-        userInterface.SendMessage(message);
+        userInterface.SendPredictedMessage(message);
     }
 }

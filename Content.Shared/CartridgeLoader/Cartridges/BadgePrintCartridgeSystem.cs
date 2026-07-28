@@ -1,4 +1,5 @@
 using Content.Shared.Access.Components;
+using Content.Shared.CartridgeLoader;
 using Content.Shared.CartridgeLoader.Cartridges;
 using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
@@ -13,9 +14,12 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
     [Dependency] private SharedTransformSystem _transform = default!;
 
     [SubscribeLocalEvent]
-    private void OnPrintMessage(EntityUid uid, BadgePrintCartridgeComponent component, BadgePrintUiMessageEvent args)
+    private void OnPrintMessage(EntityUid uid, BadgePrintCartridgeComponent component, CartridgeMessageEvent args)
     {
-        var badgePrototype = GetDepartmentPrototype(args.Dept);
+        if (args is not BadgePrintUiMessageEvent message)
+            return;
+
+        var badgePrototype = GetDepartmentPrototype(message.Dept);
         if (badgePrototype == null)
             return;
 
@@ -24,7 +28,7 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
 
         if (TryComp<TemporaryAccessComponent>(badge, out var tempAccess))
         {
-            var duration = GetTimerSpan(args.Timer);
+            var duration = GetTimerSpan(message.Timer);
             tempAccess.AccessExpireTime = duration;
             tempAccess.ExpireTime = _timing.CurTime + duration;
 

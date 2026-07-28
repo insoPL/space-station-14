@@ -12,7 +12,7 @@ public sealed partial class TemporaryAccessSystem : EntitySystem
     [Dependency] private SharedAccessSystem _access = default!;
 
     [SubscribeLocalEvent]
-    private void OnPriorityExamine(Entity<TemporaryAccessComponent> ent, ref ExaminedEvent args)
+    private void OnExamine(Entity<TemporaryAccessComponent> ent, ref ExaminedEvent args)
     {
         var timeLeft = ent.Comp.ExpireTime - _timing.CurTime;
 
@@ -25,7 +25,7 @@ public sealed partial class TemporaryAccessSystem : EntitySystem
     }
 
     [SubscribeLocalEvent]
-    private void OnPriorityMapInit(Entity<TemporaryAccessComponent> ent, ref MapInitEvent args)
+    private void OnMapInit(Entity<TemporaryAccessComponent> ent, ref MapInitEvent args)
     {
         ent.Comp.ExpireTime = _timing.CurTime + ent.Comp.AccessExpireTime;
 
