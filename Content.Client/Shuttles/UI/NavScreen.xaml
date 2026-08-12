@@ -113,5 +113,23 @@
                 <Label VerticalAlignment="Center" Text="{Loc 'shuttle-console-nav-other-dock'}"/>
             </BoxContainer>
         </Button>
+
+        <!-- Meteors Toggle -->
+        <Button Name="MeteorsToggle"
+            HorizontalAlignment="Stretch"
+            ToggleMode="True">
+            <BoxContainer Orientation="Horizontal" Margin="0 2">
+                <TextureRect
+                    Stretch="KeepAspectCentered"
+                    TexturePath="/Textures/Interface/NavMap/beveled_circle.png"
+                    Modulate="Red"
+                    SetSize="20 20"
+                    Margin="10 0 5 0"/>
+                <Label
+                    Text="{Loc 'shuttle-console-nav-meteors'}"
+                    VerticalExpand="True"
+                    HorizontalAlignment="Center" />
+            </BoxContainer>
+        </Button>
     </BoxContainer>
 </BoxContainer>

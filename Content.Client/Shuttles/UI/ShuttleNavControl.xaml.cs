@@ -11,6 +11,8 @@ using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Physics;
 using Robust.Shared.Physics.Components;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Content.Client.Shuttles.UI;
 
@@ -43,6 +45,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
     public bool ShowDocks { get; set; } = true;
     public bool ShowCargoDocks { get; set; } = true;
     public bool ShowArrivalDocks { get; set; } = true;
+    public bool ShowMeteors { get; set; } = true;
     public bool RotateWithEntity { get; set; } = true;
 
     /// <summary>
@@ -301,7 +304,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
     }
     private void DrawTracked(DrawingHandleScreen handle, Matrix3x2 worldToView)
     {
-        if (!ShowPoi)
+        if (!ShowMeteors)
             return;
 
         foreach (ref var trackedPoint in CollectionsMarshal.AsSpan(_tracked))

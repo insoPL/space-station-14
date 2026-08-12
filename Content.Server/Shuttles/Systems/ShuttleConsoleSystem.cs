@@ -15,6 +15,7 @@ using Content.Shared.Shuttles.UI.MapObjects;
 using Content.Shared.Tag;
 using Content.Shared.Timing;
 using Content.Shared.UserInterface;
+using Robust.Server.GameObjects;
 using Robust.Shared.Collections;
 using Robust.Shared.GameStates;
 using Robust.Shared.Map;
@@ -33,7 +34,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     [Dependency] private ShuttleSystem _shuttle = default!;
     [Dependency] private StationSystem _station = default!;
     [Dependency] private TagSystem _tags = default!;
-    [Dependency] private SharedUserInterfaceSystem _ui = default!;
+    [Dependency] private UserInterfaceSystem _ui = default!;
     [Dependency] private SharedContentEyeSystem _eyeSystem = default!;
     [Dependency] private EntityQuery<PilotComponent> _pilotQuery = default!;
 
