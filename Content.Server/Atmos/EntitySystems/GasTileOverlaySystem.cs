@@ -199,16 +199,16 @@ namespace Content.Server.Atmos.EntitySystems
         }
 
         /// <summary>
-        ///     Updates the visuals for a tile on some grid chunk. Returns true if the visuals have changed.
+        ///     Updates the client side atmos data. Gas visuals, temperature and fire level for a tile on some grid chunk. Returns true if the visuals have changed.
         /// </summary>
         private bool UpdateChunkTile(GridAtmosphereComponent gridAtmosphere, GasOverlayChunk chunk, Vector2i index)
         {
-            ref var oldFireData = ref chunk.TileFireData[chunk.GetDataIndex(index)];
-            ref var oldVisibleGasData = ref chunk.TileVisibleGasData[chunk.GetDataIndex(index)];
-            ref var oldTemperatureData = ref chunk.TileGasTemperatureData[chunk.GetDataIndex(index)];
-
             if (!gridAtmosphere.Tiles.TryGetValue(index, out var tile))
             {
+                ref var oldFireData = ref chunk.TileFireData[chunk.GetDataIndex(index)];
+                ref var oldVisibleGasData = ref chunk.TileVisibleGasData[chunk.GetDataIndex(index)];
+                ref var oldTemperatureData = ref chunk.TileGasTemperatureData[chunk.GetDataIndex(index)];
+
                 if (oldFireData.Equals(default) && oldVisibleGasData.Equals(default) && oldTemperatureData.Equals(default))
                     return false;
 
@@ -218,6 +218,27 @@ namespace Content.Server.Atmos.EntitySystems
                 oldTemperatureData = default;
                 return true;
             }
+
+            var tempChanged = UpdateTemperatureChunkTile(tile, chunk, index);
+            var gasChanged = UpdateVisibleGasChunkTile(tile, chunk, index);
+            var fireChanged = UpdateFireChunkTile(tile, chunk, index);
+
+            if (tempChanged || gasChanged || fireChanged)
+            {
+                chunk.LastUpdate = _gameTiming.CurTick;
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        ///     Updates the client side atmos data. Temperature for a tile on some grid chunk. Returns true if the visuals have changed.
+        /// </summary>
+        private bool UpdateTemperatureChunkTile(TileAtmosphere tile, GasOverlayChunk chunk, Vector2i index)
+        {
+            ref var oldTemperatureData = ref chunk.TileGasTemperatureData[chunk.GetDataIndex(index)];
 
             var changed = false;
 
@@ -230,21 +251,34 @@ namespace Content.Server.Atmos.EntitySystems
             else if (!tile.Space && tile.Air != null)
                 newByteTemp = new(tile.Air.Temperature);
 
-            if (oldFireData.Equals(default) && oldVisibleGasData.Equals(default) && oldTemperatureData.Equals(default))
+            if (oldTemperatureData.Equals(default))
             {
                 changed = true;
-                oldFireData = new SharedFireData(tile.Hotspot.State);
-                oldVisibleGasData = new SharedVisibleGasData(new byte[VisibleGasId.Length]);
                 oldTemperatureData = new SharedGasTemperatureData(newByteTemp);
             }
-            else if (oldFireData.FireState != tile.Hotspot.State ||
-                     Math.Abs(oldTemperatureData.ByteGasTemperature.Value - newByteTemp.Value) > 1 || // Dirty Temperature when there is more then 1 byte difference. That should measure up to minimum 4 degreese difference, 6 degreese on average.
+            else if (Math.Abs(oldTemperatureData.ByteGasTemperature.Value - newByteTemp.Value) > 1 || // Dirty Temperature when there is more then 1 byte difference. That should measure up to minimum 4 degreese difference, 6 degreese on average.
                      (oldTemperatureData.ByteGasTemperature.Value != newByteTemp.Value && newByteTemp.Value > ThermalByte.TempResolution)) // change of special ThermalByte value
             {
                 changed = true;
-                oldFireData = new SharedFireData(tile.Hotspot.State);
-                oldVisibleGasData = new SharedVisibleGasData(oldVisibleGasData.Opacity);
                 oldTemperatureData = new SharedGasTemperatureData(newByteTemp);
+            }
+
+            return changed;
+        }
+
+        /// <summary>
+        ///     Updates the client side atmos data. Gas visuals for a tile on some grid chunk. Returns true if the visuals have changed.
+        /// </summary>
+        private bool UpdateVisibleGasChunkTile(TileAtmosphere tile, GasOverlayChunk chunk, Vector2i index)
+        {
+            ref var oldVisibleGasData = ref chunk.TileVisibleGasData[chunk.GetDataIndex(index)];
+
+            var changed = false;
+
+            if (oldVisibleGasData.Equals(default))
+            {
+                changed = true;
+                oldVisibleGasData = new SharedVisibleGasData(new byte[VisibleGasId.Length]);
             }
 
             if (tile is { Air: not null, NoGridTile: false })
@@ -284,12 +318,30 @@ namespace Content.Server.Atmos.EntitySystems
                     oldVisibleGasData.Opacity[i] = 0;
                 }
             }
+            return changed;
+        }
 
-            if (!changed)
-                return false;
+        /// <summary>
+        ///     Updates the client side atmos data. Fire level for a tile on some grid chunk. Returns true if the visuals have changed.
+        /// </summary>
+        private bool UpdateFireChunkTile(TileAtmosphere tile, GasOverlayChunk chunk, Vector2i index)
+        {
+            ref var oldFireData = ref chunk.TileFireData[chunk.GetDataIndex(index)];
 
-            chunk.LastUpdate = _gameTiming.CurTick;
-            return true;
+            var changed = false;
+
+            if (oldFireData.Equals(default))
+            {
+                changed = true;
+                oldFireData = new SharedFireData(tile.Hotspot.State);
+            }
+            else if (oldFireData.FireState != tile.Hotspot.State)
+            {
+                changed = true;
+                oldFireData = new SharedFireData(tile.Hotspot.State);
+            }
+
+            return changed;
         }
 
         private void UpdateOverlayData()
