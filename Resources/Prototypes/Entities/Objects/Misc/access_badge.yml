@@ -15,8 +15,6 @@
     state: icon
     sprite: Clothing/Neck/Misc/lawyerbadge.rsi
   - type: Access
-    groups:
-    - AllAccess
     targetWhitelist:
       - Airlock
       - GlassAirlock
@@ -43,7 +41,7 @@
   name: Security Door Access Badge
   components:
   - type: Access
-    groups:
+    tags:
     - Security
 
 - type: entity
@@ -52,7 +50,7 @@
   name: Engineering Door Access Badge
   components:
   - type: Access
-    groups:
+    tags:
     - Engineering
     
 - type: entity
@@ -61,7 +59,7 @@
   name: Medical Door Access Badge
   components:
   - type: Access
-    groups:
+    tags:
     - Medical
     
 - type: entity
@@ -70,7 +68,7 @@
   name: Research Door Access Badge
   components:
   - type: Access
-    groups:
+    tags:
     - Research
     
 - type: entity
@@ -79,7 +77,7 @@
   name: Cargo Door Access Badge
   components:
   - type: Access
-    groups:
+    tags:
     - Cargo
 
     
@@ -89,5 +87,5 @@
   name: Bridge Door Access Badge
   components:
   - type: Access
-    groups:
+    tags:
     - Bridge
