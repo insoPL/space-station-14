@@ -81,3 +81,13 @@
   - type: Access
     groups:
     - Cargo
+
+    
+- type: entity
+  parent: AccessBadge
+  id: BridgeAccessBadge
+  name: Bridge Door Access Badge
+  components:
+  - type: Access
+    groups:
+    - Bridge

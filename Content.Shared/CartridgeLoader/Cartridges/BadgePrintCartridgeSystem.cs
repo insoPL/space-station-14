@@ -1,8 +1,8 @@
 using Content.Shared.Access.Components;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.CartridgeLoader.Cartridges;
-using Content.Shared.Hands.Components;
 using Content.Shared.Hands.EntitySystems;
+using Robust.Shared.Audio.Systems;
 using Robust.Shared.Timing;
 
 namespace Content.Server.CartridgeLoader.Cartridges;
@@ -12,34 +12,50 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private SharedAudioSystem _audio = default!;
 
     [SubscribeLocalEvent]
-    private void OnPrintMessage(EntityUid uid, BadgePrintCartridgeComponent component, CartridgeMessageEvent args)
+    private void OnPrintMessage(EntityUid badgePrintCartridgeUid, BadgePrintCartridgeComponent badgePrintCartridgeComponent, CartridgeMessageEvent args)
     {
         if (args is not BadgePrintUiMessageEvent message)
             return;
+        var dept = message.Dept;
+        var timer = message.Timer;
+        var user = args.User;
 
-        var badgePrototype = GetDepartmentPrototype(message.Dept);
-        if (badgePrototype == null)
+        if (_timing.CurTime < badgePrintCartridgeComponent.NextPrintAllowedAfter)
             return;
 
-        var coords = _transform.GetMapCoordinates(uid);
+        PrintBadge(badgePrintCartridgeUid, badgePrintCartridgeComponent, user, dept, timer);
+    }
+
+    private void PrintBadge(EntityUid badgePrintCartridgeUid, BadgePrintCartridgeComponent badgePrintCartridgeComponent, EntityUid user, SelectedDepartment dept, SelectedBadgeTimer timer)
+    {
+        var badgePrototype = GetDepartmentPrototype(dept);
+        if (badgePrototype == null)
+        {
+            Log.Error($"Invalid department selected for badge printing: {dept}");
+            return;
+        }
+
+        var coords = _transform.GetMapCoordinates(badgePrintCartridgeUid);
         var badge = Spawn(badgePrototype, coords);
+
+        badgePrintCartridgeComponent.NextPrintAllowedAfter = _timing.CurTime + badgePrintCartridgeComponent.PrintDelay;
+        Dirty(badgePrintCartridgeUid, badgePrintCartridgeComponent);
+
+        _audio.PlayPredicted(badgePrintCartridgeComponent.PrintSound, badgePrintCartridgeUid, user);
 
         if (TryComp<TemporaryAccessComponent>(badge, out var tempAccess))
         {
-            var duration = GetTimerSpan(message.Timer);
+            var duration = GetTimerSpan(timer);
             tempAccess.AccessExpireTime = duration;
             tempAccess.ExpireTime = _timing.CurTime + duration;
 
             Dirty(badge, tempAccess);
         }
 
-        var user = GetUserWithHands(uid);
-        if (user != null)
-        {
-            _hands.TryPickupAnyHand(user.Value, badge);
-        }
+        _hands.TryPickupAnyHand(user, badge);
     }
 
     /// <summary>
@@ -70,27 +86,9 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
             SelectedDepartment.Medical => "MedicalAccessBadge",
             SelectedDepartment.Science => "ResearchAccessBadge",
             SelectedDepartment.Cargo => "CargoAccessBadge",
-            SelectedDepartment.Bridge => "CommandAccessBadge",
+            SelectedDepartment.Bridge => "BridgeAccessBadge",
             SelectedDepartment.Service => "ServiceAccessBadge",
-            _ => "AccessBadge"
+            _ => null
         };
-    }
-
-    /// <summary>
-    /// Climbs the transform tree from the Cartridge -> PDA -> Player to find their hands.
-    /// </summary>
-    private EntityUid? GetUserWithHands(EntityUid cartridgeUid)
-    {
-        var current = Transform(cartridgeUid).ParentUid;
-
-        while (current.IsValid())
-        {
-            if (HasComp<HandsComponent>(current))
-                return current;
-
-            current = Transform(current).ParentUid;
-        }
-
-        return null;
     }
 }

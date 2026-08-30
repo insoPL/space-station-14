@@ -18,10 +18,4 @@ public sealed partial class TemporaryAccessComponent : Component
 
     [DataField, AutoNetworkedField]
     public TimeSpan ExpireTime;
-
-    [DataField, AutoNetworkedField]
-    public TimeSpan PrintCooldownTime = TimeSpan.FromSeconds(5);
-
-    [DataField(customTypeSerializer: typeof(TimeOffsetSerializer))]
-    public TimeSpan PrintCooldownTimer;
 }
