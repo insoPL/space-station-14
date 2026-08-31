@@ -1,11 +1,17 @@
+using Content.Shared.Access;
 using Content.Shared.Access.Components;
+using Content.Shared.Access.Systems;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.CartridgeLoader.Cartridges;
 using Content.Shared.Hands.EntitySystems;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server.CartridgeLoader.Cartridges;
+//TODO bug inhand while spawning
+//Normal icons and inhands
+//extract canPrint() method
 
 public sealed partial class BadgePrintCartridgeSystem : EntitySystem
 {
@@ -13,6 +19,7 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private AccessReaderSystem _accessReader = default!;
 
     [SubscribeLocalEvent]
     private void OnPrintMessage(EntityUid badgePrintCartridgeUid, BadgePrintCartridgeComponent badgePrintCartridgeComponent, CartridgeMessageEvent args)
@@ -22,11 +29,40 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
         var dept = message.Dept;
         var timer = message.Timer;
         var user = args.User;
-
         if (_timing.CurTime < badgePrintCartridgeComponent.NextPrintAllowedAfter)
             return;
 
+        var accessTagName = GetAccessTagName(dept);
+        if (accessTagName == null)
+            return;
+
+        var accessItems = _accessReader.FindPotentialAccessItems(user);
+        var tags = _accessReader.FindAccessTags(user, accessItems);
+
+        // Wrap the string in a ProtoId so it matches the collection type
+        //this can be done better propably
+        if (!tags.Contains(new ProtoId<AccessLevelPrototype>(accessTagName)))
+        {
+            return;
+        }
+
         PrintBadge(badgePrintCartridgeUid, badgePrintCartridgeComponent, user, dept, timer);
+    }
+
+    private static string? GetAccessTagName(SelectedDepartment dept)
+    {
+        return dept switch
+        {
+            SelectedDepartment.Bridge => "Command",
+            SelectedDepartment.Security => "Security",
+            SelectedDepartment.Medical => "Medical",
+            SelectedDepartment.Engineering => "Engineering",
+            SelectedDepartment.Science => "Research",
+            SelectedDepartment.Cargo => "Cargo",
+            SelectedDepartment.Service => "Service",
+            SelectedDepartment.All => "Captain",
+            _ => null
+        };
     }
 
     private void PrintBadge(EntityUid badgePrintCartridgeUid, BadgePrintCartridgeComponent badgePrintCartridgeComponent, EntityUid user, SelectedDepartment dept, SelectedBadgeTimer timer)
@@ -61,7 +97,7 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
     /// <summary>
     /// Maps the UI's time enum to actual TimeSpans.
     /// </summary>
-    private TimeSpan GetTimerSpan(SelectedBadgeTimer timer)
+    private static TimeSpan GetTimerSpan(SelectedBadgeTimer timer)
     {
         return timer switch
         {
@@ -76,7 +112,7 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
     /// <summary>
     /// Maps the UI's department enum to the prototype IDs defined in access_badge.yml
     /// </summary>
-    private string? GetDepartmentPrototype(SelectedDepartment dept)
+    private static string? GetDepartmentPrototype(SelectedDepartment dept)
     {
         return dept switch
         {

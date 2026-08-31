@@ -89,3 +89,14 @@
   - type: Access
     tags:
     - Bridge
+
+
+    
+- type: entity
+  parent: AccessBadge
+  id: ServiceAccessBadge
+  name: Service Door Access Badge
+  components:
+  - type: Access
+    tags:
+    - Service
