@@ -3,21 +3,20 @@ using Content.Shared.Access.Components;
 using Content.Shared.Access.Systems;
 using Content.Shared.CartridgeLoader;
 using Content.Shared.CartridgeLoader.Cartridges;
+using Content.Shared.Coordinates;
 using Content.Shared.Hands.EntitySystems;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server.CartridgeLoader.Cartridges;
-//TODO bug inhand while spawning
+//TODO
 //Normal icons and inhands
-//extract canPrint() method
 
 public sealed partial class BadgePrintCartridgeSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
-    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private AccessReaderSystem _accessReader = default!;
 
@@ -29,40 +28,34 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
         var dept = message.Dept;
         var timer = message.Timer;
         var user = args.User;
-        if (_timing.CurTime < badgePrintCartridgeComponent.NextPrintAllowedAfter)
-            return;
 
-        var accessTagName = GetAccessTagName(dept);
-        if (accessTagName == null)
-            return;
-
-        var accessItems = _accessReader.FindPotentialAccessItems(user);
-        var tags = _accessReader.FindAccessTags(user, accessItems);
-
-        // Wrap the string in a ProtoId so it matches the collection type
-        //this can be done better propably
-        if (!tags.Contains(new ProtoId<AccessLevelPrototype>(accessTagName)))
+        if (!CanPrintBadge(badgePrintCartridgeComponent, dept, user))
         {
+            _audio.PlayPredicted(badgePrintCartridgeComponent.DenySound, badgePrintCartridgeUid, user);
             return;
         }
 
         PrintBadge(badgePrintCartridgeUid, badgePrintCartridgeComponent, user, dept, timer);
     }
 
-    private static string? GetAccessTagName(SelectedDepartment dept)
+    private bool CanPrintBadge(BadgePrintCartridgeComponent badgePrintCartridgeComponent, SelectedDepartment dept, EntityUid user)
     {
-        return dept switch
+        if (_timing.CurTime < badgePrintCartridgeComponent.NextPrintAllowedAfter)
+            return false;
+
+        var accessTagName = GetAccessTagName(dept);
+        if (accessTagName == null)
+            return false;
+
+        var accessItems = _accessReader.FindPotentialAccessItems(user);
+        var userAccessTag = _accessReader.FindAccessTags(user, accessItems);
+
+        if (!userAccessTag.Contains(new ProtoId<AccessLevelPrototype>(accessTagName)))
         {
-            SelectedDepartment.Bridge => "Command",
-            SelectedDepartment.Security => "Security",
-            SelectedDepartment.Medical => "Medical",
-            SelectedDepartment.Engineering => "Engineering",
-            SelectedDepartment.Science => "Research",
-            SelectedDepartment.Cargo => "Cargo",
-            SelectedDepartment.Service => "Service",
-            SelectedDepartment.All => "Captain",
-            _ => null
-        };
+            return false;
+        }
+
+        return true;
     }
 
     private void PrintBadge(EntityUid badgePrintCartridgeUid, BadgePrintCartridgeComponent badgePrintCartridgeComponent, EntityUid user, SelectedDepartment dept, SelectedBadgeTimer timer)
@@ -74,8 +67,8 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
             return;
         }
 
-        var coords = _transform.GetMapCoordinates(badgePrintCartridgeUid);
-        var badge = Spawn(badgePrototype, coords);
+        var badge = PredictedSpawnAtPosition(badgePrototype, badgePrintCartridgeUid.ToCoordinates());
+        _hands.PickupOrDrop(user, badge);
 
         badgePrintCartridgeComponent.NextPrintAllowedAfter = _timing.CurTime + badgePrintCartridgeComponent.PrintDelay;
         Dirty(badgePrintCartridgeUid, badgePrintCartridgeComponent);
@@ -90,8 +83,25 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
 
             Dirty(badge, tempAccess);
         }
+    }
 
-        _hands.TryPickupAnyHand(user, badge);
+    /// <summary>
+    /// Maps the UI's department enum to the access tags
+    /// </summary>
+    private static string? GetAccessTagName(SelectedDepartment dept)
+    {
+        return dept switch
+        {
+            SelectedDepartment.Bridge => "Command",
+            SelectedDepartment.Security => "Security",
+            SelectedDepartment.Medical => "Medical",
+            SelectedDepartment.Engineering => "Engineering",
+            SelectedDepartment.Science => "Research",
+            SelectedDepartment.Cargo => "Cargo",
+            SelectedDepartment.Service => "Service",
+            SelectedDepartment.All => "Captain",
+            _ => null
+        };
     }
 
     /// <summary>

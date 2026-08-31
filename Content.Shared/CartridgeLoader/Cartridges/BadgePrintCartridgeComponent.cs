@@ -14,6 +14,12 @@ public sealed partial class BadgePrintCartridgeComponent : Component
     public SoundSpecifier PrintSound = new SoundPathSpecifier("/Audio/Machines/diagnoser_printing.ogg");
 
     /// <summary>
+    /// The sound made when print fail
+    /// </summary>
+    [DataField]
+    public SoundSpecifier DenySound = new SoundPathSpecifier("/Audio/Machines/custom_deny.ogg");
+
+    /// <summary>
     /// When the user can print again
     /// </summary>
     [DataField(customTypeSerializer: typeof(TimeOffsetSerializer)), AutoNetworkedField, AutoPausedField]
