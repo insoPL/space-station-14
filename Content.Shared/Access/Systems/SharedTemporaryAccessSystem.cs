@@ -1,6 +1,5 @@
 using Content.Shared.Access.Components;
 using Content.Shared.Examine;
-using Content.Shared.NameModifier.EntitySystems;
 using Robust.Shared.Timing;
 
 namespace Content.Shared.Access.Systems;
@@ -8,7 +7,6 @@ namespace Content.Shared.Access.Systems;
 public sealed partial class TemporaryAccessSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
-    [Dependency] private NameModifierSystem _nameModifier = default!;
     [Dependency] private SharedAccessSystem _access = default!;
 
     [SubscribeLocalEvent]

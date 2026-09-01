@@ -1,15 +1,13 @@
 using Content.Shared.Access;
 using Content.Shared.Access.Components;
 using Content.Shared.Access.Systems;
-using Content.Shared.CartridgeLoader;
-using Content.Shared.CartridgeLoader.Cartridges;
 using Content.Shared.Coordinates;
 using Content.Shared.Hands.EntitySystems;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
-namespace Content.Server.CartridgeLoader.Cartridges;
+namespace Content.Shared.CartridgeLoader.Cartridges;
 //TODO
 //Normal icons and inhands
 
@@ -85,6 +83,8 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
         }
     }
 
+    //region: maping functions
+
     /// <summary>
     /// Maps the UI's department enum to the access tags
     /// </summary>
@@ -137,4 +137,5 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
             _ => null
         };
     }
+    //endregion
 }
