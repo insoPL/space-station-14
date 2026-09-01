@@ -24,7 +24,6 @@
     tags:
     - DoorBumpOpener
   - type: TemporaryAccess
-    accessExpireTime: 300
 
 - type: entity
   parent: AccessBadge
@@ -79,7 +78,6 @@
   - type: Access
     tags:
     - Cargo
-
     
 - type: entity
   parent: AccessBadge
@@ -89,8 +87,6 @@
   - type: Access
     tags:
     - Bridge
-
-
     
 - type: entity
   parent: AccessBadge
