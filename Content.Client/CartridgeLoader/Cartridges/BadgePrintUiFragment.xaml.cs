@@ -32,7 +32,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
 
         // --- DEPARTMENT BUTTONS SETUP ---
         AllAccess.ToggleMode = true;
-        BridgeAccess.ToggleMode = true;
+        CommandAccess.ToggleMode = true;
         SecurityAccess.ToggleMode = true;
         MedicalAccess.ToggleMode = true;
         EngineeringAccess.ToggleMode = true;
@@ -41,7 +41,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         ServiceAccess.ToggleMode = true;
 
         AllAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.All);
-        BridgeAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Bridge);
+        CommandAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Command);
         SecurityAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Security);
         MedicalAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Medical);
         EngineeringAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Engineering);
@@ -63,7 +63,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
     public void UpdateAccess(ICollection<ProtoId<AccessLevelPrototype>> accesses)
     {
         var all = accesses.Contains(new("Captain"));
-        var bridge = accesses.Contains(new("Command"));
+        var command = accesses.Contains(new("Command"));
         var sec = accesses.Contains(new("Security"));
         var med = accesses.Contains(new("Medical"));
         var eng = accesses.Contains(new("Engineering"));
@@ -72,7 +72,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         var srv = accesses.Contains(new("Service"));
 
         AllAccess.Disabled = !all;
-        BridgeAccess.Disabled = !bridge;
+        CommandAccess.Disabled = !command;
         SecurityAccess.Disabled = !sec;
         MedicalAccess.Disabled = !med;
         EngineeringAccess.Disabled = !eng;
@@ -82,7 +82,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
 
         // Select first available department
         if (all) SetActiveDepartment(SelectedDepartment.All);
-        else if (bridge) SetActiveDepartment(SelectedDepartment.Bridge);
+        else if (command) SetActiveDepartment(SelectedDepartment.Command);
         else if (sec) SetActiveDepartment(SelectedDepartment.Security);
         else if (med) SetActiveDepartment(SelectedDepartment.Medical);
         else if (eng) SetActiveDepartment(SelectedDepartment.Engineering);
@@ -107,7 +107,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         SelectedDept = department;
 
         AllAccess.Pressed = (department == SelectedDepartment.All);
-        BridgeAccess.Pressed = (department == SelectedDepartment.Bridge);
+        CommandAccess.Pressed = (department == SelectedDepartment.Command);
         SecurityAccess.Pressed = (department == SelectedDepartment.Security);
         MedicalAccess.Pressed = (department == SelectedDepartment.Medical);
         EngineeringAccess.Pressed = (department == SelectedDepartment.Engineering);

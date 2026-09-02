@@ -81,12 +81,12 @@
     
 - type: entity
   parent: AccessBadge
-  id: BridgeAccessBadge
-  name: Bridge Door Access Badge
+  id: CommandAccessBadge
+  name: Command Door Access Badge
   components:
   - type: Access
     tags:
-    - Bridge
+    - Command
     
 - type: entity
   parent: AccessBadge

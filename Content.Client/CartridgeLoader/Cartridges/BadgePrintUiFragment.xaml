@@ -58,11 +58,11 @@
                     Text="All Access"
                     Access="Public"/>
                 <Button
-                    Name="BridgeAccess"
+                    Name="CommandAccess"
                     MinWidth="125"
                     MinHeight="40"
                     Margin="0 0 5 5"
-                    Text="Bridge"
+                    Text="Command"
                     Access="Public"/>
                 <Button
                     Name="SecurityAccess"

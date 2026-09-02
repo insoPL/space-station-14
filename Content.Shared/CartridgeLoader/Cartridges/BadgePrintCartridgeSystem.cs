@@ -92,7 +92,7 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
     {
         return dept switch
         {
-            SelectedDepartment.Bridge => "Command",
+            SelectedDepartment.Command => "Command",
             SelectedDepartment.Security => "Security",
             SelectedDepartment.Medical => "Medical",
             SelectedDepartment.Engineering => "Engineering",
@@ -132,7 +132,7 @@ public sealed partial class BadgePrintCartridgeSystem : EntitySystem
             SelectedDepartment.Medical => "MedicalAccessBadge",
             SelectedDepartment.Science => "ResearchAccessBadge",
             SelectedDepartment.Cargo => "CargoAccessBadge",
-            SelectedDepartment.Bridge => "BridgeAccessBadge",
+            SelectedDepartment.Command => "CommandAccessBadge",
             SelectedDepartment.Service => "ServiceAccessBadge",
             _ => null
         };

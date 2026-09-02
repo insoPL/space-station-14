@@ -28,7 +28,7 @@ public enum SelectedBadgeTimer
 public enum SelectedDepartment
 {
     All,
-    Bridge,
+    Command,
     Security,
     Medical,
     Engineering,
