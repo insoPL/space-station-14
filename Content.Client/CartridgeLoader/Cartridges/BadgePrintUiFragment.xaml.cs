@@ -36,7 +36,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         SecurityAccess.ToggleMode = true;
         MedicalAccess.ToggleMode = true;
         EngineeringAccess.ToggleMode = true;
-        ScienceAccess.ToggleMode = true;
+        ResearchAccess.ToggleMode = true;
         CargoAccess.ToggleMode = true;
         ServiceAccess.ToggleMode = true;
 
@@ -45,7 +45,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         SecurityAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Security);
         MedicalAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Medical);
         EngineeringAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Engineering);
-        ScienceAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Science);
+        ResearchAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Research);
         CargoAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Cargo);
         ServiceAccess.OnPressed += _ => SetActiveDepartment(SelectedDepartment.Service);
 
@@ -76,7 +76,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         SecurityAccess.Disabled = !sec;
         MedicalAccess.Disabled = !med;
         EngineeringAccess.Disabled = !eng;
-        ScienceAccess.Disabled = !sci;
+        ResearchAccess.Disabled = !sci;
         CargoAccess.Disabled = !cargo;
         ServiceAccess.Disabled = !srv;
 
@@ -86,7 +86,7 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         else if (sec) SetActiveDepartment(SelectedDepartment.Security);
         else if (med) SetActiveDepartment(SelectedDepartment.Medical);
         else if (eng) SetActiveDepartment(SelectedDepartment.Engineering);
-        else if (sci) SetActiveDepartment(SelectedDepartment.Science);
+        else if (sci) SetActiveDepartment(SelectedDepartment.Research);
         else if (cargo) SetActiveDepartment(SelectedDepartment.Cargo);
         else if (srv) SetActiveDepartment(SelectedDepartment.Service);
         else Print.Disabled = true; // Disable printing if no accesses match
@@ -111,12 +111,8 @@ public sealed partial class BadgePrintUiFragment : BoxContainer
         SecurityAccess.Pressed = (department == SelectedDepartment.Security);
         MedicalAccess.Pressed = (department == SelectedDepartment.Medical);
         EngineeringAccess.Pressed = (department == SelectedDepartment.Engineering);
-        ScienceAccess.Pressed = (department == SelectedDepartment.Science);
+        ResearchAccess.Pressed = (department == SelectedDepartment.Research);
         CargoAccess.Pressed = (department == SelectedDepartment.Cargo);
         ServiceAccess.Pressed = (department == SelectedDepartment.Service);
-    }
-
-    public void UpdateState()
-    {
     }
 }

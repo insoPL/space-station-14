@@ -1,5 +1,6 @@
 - type: accessGroup
   id: AllAccess
+  name: All Access
   tags:
   - EmergencyShuttleRepealAll
   - Captain

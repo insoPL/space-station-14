@@ -32,7 +32,7 @@ public enum SelectedDepartment
     Security,
     Medical,
     Engineering,
-    Science,
+    Research,
     Cargo,
     Service
 }

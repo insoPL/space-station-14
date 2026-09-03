@@ -96,6 +96,7 @@
         - id: NotekeeperCartridge
         - id: NanoTaskCartridge
         - id: NewsReaderCartridge
+        - id: BadgePrintCartridge
   - type: ActivatableUI
     key: enum.PdaUiKey.Key
     singleUser: true
@@ -497,6 +498,7 @@
         - id: NanoTaskCartridge
         - id: NewsReaderCartridge
         - id: AstroNavCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BasePDA
@@ -698,6 +700,15 @@
     accentHColor: "#447987"
   - type: Icon
     state: pda-hop
+  - type: EntityTableContainerFill
+    containers:
+      preinstalled-program-container: !type:AllSelector
+        children:
+        - id: CrewManifestCartridge
+        - id: NotekeeperCartridge
+        - id: NanoTaskCartridge
+        - id: NewsReaderCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BasePDA
@@ -717,6 +728,15 @@
     accentHColor: "#447987"
   - type: Icon
     state: pda-ce
+  - type: EntityTableContainerFill
+    containers:
+      preinstalled-program-container: !type:AllSelector
+        children:
+        - id: CrewManifestCartridge
+        - id: NotekeeperCartridge
+        - id: NanoTaskCartridge
+        - id: NewsReaderCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BasePDA
@@ -756,6 +776,15 @@
     accentVColor: "#447987"
   - type: Icon
     state: pda-cmo
+  - type: EntityTableContainerFill
+    containers:
+      preinstalled-program-container: !type:AllSelector
+        children:
+        - id: CrewManifestCartridge
+        - id: NotekeeperCartridge
+        - id: NanoTaskCartridge
+        - id: NewsReaderCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BaseMedicalPDA
@@ -847,6 +876,15 @@
     accentVColor: "#8900c9"
   - type: Icon
     state: pda-rd
+  - type: EntityTableContainerFill
+    containers:
+      preinstalled-program-container: !type:AllSelector
+        children:
+        - id: CrewManifestCartridge
+        - id: NotekeeperCartridge
+        - id: NanoTaskCartridge
+        - id: NewsReaderCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BasePDA
@@ -895,6 +933,7 @@
         - id: NewsReaderCartridge
         - id: WantedListCartridge
         - id: LogProbeCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BaseSecurityPDA
@@ -914,6 +953,16 @@
     accentVColor: "#949137"
   - type: Icon
     state: pda-warden
+  - type: EntityTableContainerFill
+    containers:
+      preinstalled-program-container: !type:AllSelector
+        children:
+        - id: CrewManifestCartridge
+        - id: NotekeeperCartridge
+        - id: NanoTaskCartridge
+        - id: NewsReaderCartridge
+        - id: WantedListCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: BaseSecurityPDA
@@ -996,6 +1045,7 @@
         - id: WantedListCartridge
         - id: MedTekCartridge
         - id: AstroNavCartridge
+        - id: BadgePrintCartridge
   - type: Tag #  Ignore Chameleon tags
     tags:
     - DoorBumpOpener
@@ -1212,6 +1262,7 @@
         - id: WantedListCartridge
         - id: LogProbeCartridge
         - id: AstroNavCartridge
+        - id: BadgePrintCartridge
 
 - type: entity
   parent: ERTLeaderPDA
