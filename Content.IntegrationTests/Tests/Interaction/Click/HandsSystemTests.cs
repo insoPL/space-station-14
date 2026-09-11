@@ -18,7 +18,7 @@ public sealed partial class HandWhitelistTests : GameTest
     [TestPrototypes]
     private const string Prototypes = @"
 - type: Tag
-  id: DummyWhitelistTag
+  id: DummyTag
 
 - type: entity
   id: DummyWhitelistedItem
@@ -26,7 +26,7 @@ public sealed partial class HandWhitelistTests : GameTest
   - type: Item
   - type: Tag
     tags:
-    - DummyWhitelistTag
+    - DummyTag
 
 - type: entity
   id: DummyRegularItem
@@ -37,41 +37,37 @@ public sealed partial class HandWhitelistTests : GameTest
     [Test]
     public async Task HandWhitelistPickupTest()
     {
-        var pair = Pair;
-        var server = pair.Server;
-
-        var sEntities = server.ResolveDependency<IEntityManager>();
-        var sysMan = server.ResolveDependency<IEntitySystemManager>();
+        var sysMan = Server.ResolveDependency<IEntitySystemManager>();
         var handSys = sysMan.GetEntitySystem<SharedHandsSystem>();
         var whitelistSystem = sysMan.GetEntitySystem<EntityWhitelistSystem>();
 
-        var map = await pair.CreateTestMap();
+        var map = await Pair.CreateTestMap();
         var coords = map.MapCoords;
 
-        await server.WaitIdleAsync();
+        await Server.WaitIdleAsync();
 
         EntityUid user = default;
         EntityUid allowedItem = default;
         EntityUid deniedItem = default;
 
-        await server.WaitAssertion(() =>
+        await Server.WaitAssertion(() =>
         {
-            user = sEntities.SpawnEntity(null, coords);
-            sEntities.EnsureComponent<HandsComponent>(user);
+            user = SEntMan.SpawnEntity(null, coords);
+            SEntMan.EnsureComponent<HandsComponent>(user);
 
             handSys.AddHand(user, "restricted_hand", HandLocation.Right);
         });
 
-        await server.WaitRunTicks(1);
+        await Server.WaitRunTicks(1);
 
-        await server.WaitAssertion(() =>
+        await Server.WaitAssertion(() =>
         {
-            var handsComp = sEntities.GetComponent<HandsComponent>(user);
+            var handsComp = SEntMan.GetComponent<HandsComponent>(user);
 
             // Create a whitelist that strictly requires our dummy tag
             var whitelist = new EntityWhitelist
             {
-                Tags = new List<ProtoId<TagPrototype>> { "DummyWhitelistTag" }
+                Tags = new List<ProtoId<TagPrototype>> { "DummyTag" }
             };
 
             // Apply whitelist to the hand component
@@ -86,13 +82,13 @@ public sealed partial class HandWhitelistTests : GameTest
 #pragma warning restore RA0002
 
             // Spawn item with and without the required tag
-            allowedItem = sEntities.SpawnEntity("DummyWhitelistedItem", coords);
-            deniedItem = sEntities.SpawnEntity("DummyRegularItem", coords);
+            allowedItem = SEntMan.SpawnEntity("DummyWhitelistedItem", coords);
+            deniedItem = SEntMan.SpawnEntity("DummyRegularItem", coords);
         });
 
-        await server.WaitRunTicks(1); // haisen test fix
+        await Server.WaitRunTicks(1); // haisen test fix
 
-        await server.WaitAssertion(() =>
+        await Server.WaitAssertion(() =>
         {
             // Attempt to pick up the item that lacks the required tag
             var pickupDenied = handSys.TryPickup(user, deniedItem);
