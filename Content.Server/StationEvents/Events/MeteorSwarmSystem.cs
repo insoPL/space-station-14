@@ -1,25 +1,21 @@
-using System.Numerics;
-using Content.Server.Chat.Systems;
-using Content.Server.GameTicking.Rules;
+
 using Content.Server.StationEvents.Components;
 using Content.Shared.GameTicking.Components;
 using Content.Shared.GameTicking.Rules;
 using Content.Shared.Random.Helpers;
+using Content.Shared.Station.Systems;
 using Robust.Shared.Map;
 using Robust.Shared.Physics.Components;
 using Robust.Shared.Physics.Systems;
 using Robust.Shared.Random;
-using Content.Shared.Station;
-using Robust.Shared.Audio.Systems;
+using System.Numerics;
 
 namespace Content.Server.StationEvents.Events;
 
 public sealed partial class MeteorSwarmSystem : GameRuleSystem<MeteorSwarmComponent>
 {
     [Dependency] private SharedPhysicsSystem _physics = default!;
-    [Dependency] private SharedAudioSystem _audio = default!;
-    [Dependency] private ChatSystem _chat = default!;
-    [Dependency] private SharedStationSystem _station = default!;
+    [Dependency] private StationSystem _station = default!;
 
     protected override void Added(Entity<MeteorSwarmComponent, GameRuleComponent> rule, ref GameRuleAddedEvent args)
     {

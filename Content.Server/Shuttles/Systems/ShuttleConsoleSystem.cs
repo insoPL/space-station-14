@@ -377,8 +377,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     /// Specific for a particular shuttle.
     /// </summary>
     public NavInterfaceState GetNavState(
-        Entity<RadarConsoleComponent?,
-        TransformComponent?> entity,
+        Entity<RadarConsoleComponent?, TransformComponent?> entity,
         Dictionary<NetEntity, List<DockingPortState>> docks,
         List<TrackedPoint> tracked)
     {
