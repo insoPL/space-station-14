@@ -1,0 +1,35 @@
+using Robust.Shared.GameStates;
+using Robust.Shared.Serialization;
+using System.Numerics;
+
+namespace Content.Shared.Shuttles.Components;
+
+/// <summary>
+/// Interact with to start piloting a shuttle.
+/// </summary>
+[RegisterComponent, NetworkedComponent]
+public sealed partial class ShuttleConsoleComponent : Component
+{
+    public static string DiskSlotName = "disk_slot";
+
+    [ViewVariables]
+    public readonly List<EntityUid> SubscribedPilots = new();
+
+    /// <summary>
+    /// How much should the pilot's eye be zoomed by when piloting using this console?
+    /// </summary>
+    [DataField]
+    public Vector2 Zoom = new(1.5f, 1.5f);
+
+    /// <summary>
+    /// Should this console have access to restricted FTL destinations?
+    /// </summary>
+    [ViewVariables(VVAccess.ReadWrite), DataField("whitelistSpecific")]
+    public List<EntityUid> FTLWhitelist = new List<EntityUid>();
+}
+
+[Serializable, NetSerializable]
+public enum ShuttleConsoleUiKey : byte
+{
+    Key,
+}

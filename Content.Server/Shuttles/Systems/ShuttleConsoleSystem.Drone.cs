@@ -21,19 +21,7 @@ public sealed partial class ShuttleConsoleSystem
         return getShuttleEv.Console;
     }
 
-    /// <summary>
-    /// Refreshes all drone console entities.
-    /// </summary>
-    public void RefreshDroneConsoles()
-    {
-        var query = AllEntityQuery<DroneConsoleComponent>();
-
-        while (query.MoveNext(out var uid, out var comp))
-        {
-            comp.Entity = GetShuttleConsole(uid, comp);
-        }
-    }
-
+    [SubscribeLocalEvent]
     private void OnDronePilotConsoleOpen(EntityUid uid, DroneConsoleComponent component, AfterActivatableUIOpenEvent args)
     {
         component.Entity = GetShuttleConsole(uid);
@@ -46,6 +34,7 @@ public sealed partial class ShuttleConsoleSystem
             component.Entity = null;
     }
 
+    [SubscribeLocalEvent]
     private void OnCargoGetConsole(EntityUid uid, DroneConsoleComponent component, ref ConsoleShuttleEvent args)
     {
         args.Console = GetShuttleConsole(uid, component);

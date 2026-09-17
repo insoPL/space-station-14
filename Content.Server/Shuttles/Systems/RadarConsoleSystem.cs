@@ -1,10 +1,7 @@
 using System.Numerics;
-using Content.Server.UserInterface;
 using Content.Shared.Shuttles.BUIStates;
 using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
-using Content.Shared.PowerCell;
-using Content.Shared.Movement.Components;
 using Robust.Server.GameObjects;
 using Robust.Shared.Map;
 
@@ -15,12 +12,7 @@ public sealed partial class RadarConsoleSystem : SharedRadarConsoleSystem
     [Dependency] private ShuttleConsoleSystem _console = default!;
     [Dependency] private UserInterfaceSystem _uiSystem = default!;
 
-    public override void Initialize()
-    {
-        base.Initialize();
-        SubscribeLocalEvent<RadarConsoleComponent, ComponentStartup>(OnRadarStartup);
-    }
-
+    [SubscribeLocalEvent]
     private void OnRadarStartup(EntityUid uid, RadarConsoleComponent component, ComponentStartup args)
     {
         UpdateState(uid, component);
