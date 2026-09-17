@@ -302,6 +302,7 @@ public sealed partial class ShuttleNavControl : BaseShuttleControl
         }
 
     }
+
     private void DrawTracked(DrawingHandleScreen handle, Matrix3x2 worldToView)
     {
         if (!ShowMeteors)

@@ -300,7 +300,6 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         {
             RemovePilot(uid, comp);
         }
-        RefreshShuttleConsoles(); // Needed to network meteors and docks.
     }
 
     protected override void HandlePilotShutdown(EntityUid uid, PilotComponent component, ComponentShutdown args)
