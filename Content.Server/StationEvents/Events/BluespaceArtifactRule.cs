@@ -1,10 +1,10 @@
 using Content.Server.StationEvents.Components;
-﻿using Content.Shared.GameTicking.Components;
+using Content.Shared.GameTicking.Components;
 using Robust.Shared.Random;
 
 namespace Content.Server.StationEvents.Events;
 
-public sealed class BluespaceArtifactRule : StationEventSystem<BluespaceArtifactRuleComponent>
+public sealed partial class BluespaceArtifactRule : StationEventSystem<BluespaceArtifactRuleComponent>
 {
     protected override void Added(EntityUid uid, BluespaceArtifactRuleComponent component, GameRuleComponent gameRule, GameRuleAddedEvent args)
     {
@@ -25,7 +25,7 @@ public sealed class BluespaceArtifactRule : StationEventSystem<BluespaceArtifact
         var amountToSpawn = 1;
         for (var i = 0; i < amountToSpawn; i++)
         {
-            if (!TryFindRandomTile(out _, out _, out _, out var coords))
+            if (!Station.TryFindRandomTile(out _, out _, out _, out var coords))
                 return;
 
             Spawn(component.ArtifactSpawnerPrototype, coords);
