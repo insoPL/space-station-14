@@ -40,25 +40,6 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
 
     private static readonly ProtoId<TagPrototype> CanPilotTag = "CanPilot";
 
-    public override void Initialize()
-    {
-        base.Initialize();
-
-        Subs.BuiEvents<ShuttleConsoleComponent>(ShuttleConsoleUiKey.Key, subs =>
-        {
-            subs.Event<ShuttleConsoleFTLBeaconMessage>(OnBeaconFTLMessage);
-            subs.Event<ShuttleConsoleFTLPositionMessage>(OnPositionFTLMessage);
-            subs.Event<BoundUIClosedEvent>(OnConsoleUIClose);
-        });
-
-        Subs.BuiEvents<DroneConsoleComponent>(ShuttleConsoleUiKey.Key, subs =>
-        {
-            subs.Event<BoundUIClosedEvent>(OnDronePilotConsoleClose);
-        });
-
-        InitializeFTL();
-    }
-
     [SubscribeLocalEvent]
     private void OnFtlDestStartup(EntityUid uid, FTLDestinationComponent component, ComponentStartup args)
     {
@@ -120,7 +101,9 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     /// <summary>
     /// Stop piloting if the window is closed.
     /// </summary>
-    private void OnConsoleUIClose(EntityUid uid, ShuttleConsoleComponent component, BoundUIClosedEvent args)
+    ///
+    [SubscribeLocalEvent]
+    private void OnConsoleUIClose(Entity<ShuttleConsoleComponent> _, ref BoundUIClosedEvent args)
     {
         if ((ShuttleConsoleUiKey)args.UiKey != ShuttleConsoleUiKey.Key)
         {

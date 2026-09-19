@@ -5,6 +5,7 @@ using Content.Server.Shuttles.Events;
 using Content.Shared.Doors;
 using Content.Shared.Doors.Components;
 using Content.Shared.Popups;
+using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Events;
 using Content.Shared.Shuttles.Systems;
 using Robust.Shared.Map;
@@ -37,30 +38,30 @@ public sealed partial class DockingSystem : SharedDockingSystem
     private readonly HashSet<Entity<DockingComponent, DoorBoltComponent>> _dockingBoltSet = new();
 
     [SubscribeLocalEvent]
-    private void OnAutoClose(EntityUid uid, DockingComponent component, BeforeDoorAutoCloseEvent args)
+    private void OnAutoClose(Entity<DockingComponent> dock, ref BeforeDoorAutoCloseEvent args)
     {
         // We'll just pin the door open when docked.
-        if (component.Docked)
+        if (dock.Comp.Docked)
             args.Cancel();
     }
 
     [SubscribeLocalEvent]
-    private void OnShutdown(EntityUid uid, DockingComponent component, ComponentShutdown args)
+    private void OnShutdown(Entity<DockingComponent> dock, ref ComponentShutdown args)
     {
-        if (component.DockedWith == null ||
-            MetaData(uid).EntityLifeStage > EntityLifeStage.MapInitialized)
+        if (dock.Comp.DockedWith == null ||
+            MetaData(dock.Owner).EntityLifeStage > EntityLifeStage.MapInitialized)
         {
             return;
         }
 
-        var gridUid = Transform(uid).GridUid;
+        var gridUid = Transform(dock).GridUid;
 
         if (gridUid != null && !Terminating(gridUid.Value))
         {
             _console.RefreshShuttleConsoles();
         }
 
-        Cleanup(uid, component);
+        Cleanup(dock);
     }
 
     [SubscribeLocalEvent]
@@ -115,7 +116,7 @@ public sealed partial class DockingSystem : SharedDockingSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnRequestUndock(EntityUid uid, ShuttleConsoleComponent component, UndockRequestMessage args)
+    private void OnRequestUndock(Entity<ShuttleConsoleComponent> _, ref UndockRequestMessage args)
     {
         if (!TryGetEntity(args.DockEntity, out var dockEnt) ||
             !_dockingQuery.TryComp(dockEnt, out var dockComp))
@@ -136,9 +137,9 @@ public sealed partial class DockingSystem : SharedDockingSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnRequestDock(EntityUid uid, ShuttleConsoleComponent component, DockRequestMessage args)
+    private void OnRequestDock(Entity<ShuttleConsoleComponent> shuttleConsole, ref DockRequestMessage args)
     {
-        var console = _console.GetDroneConsole(uid);
+        var console = _console.GetDroneConsole(shuttleConsole);
 
         if (console == null)
         {
@@ -182,22 +183,22 @@ public sealed partial class DockingSystem : SharedDockingSystem
         Dock((ourDock.Value, ourDockComp), (targetDock.Value, targetDockComp));
     }
 
-    private void Cleanup(EntityUid dockAUid, DockingComponent dockA)
+    private void Cleanup(Entity<DockingComponent> dock)
     {
-        _pathfinding.RemovePortal(dockA.PathfindHandle);
+        _pathfinding.RemovePortal(dock.Comp.PathfindHandle);
 
-        if (dockA.DockJoint != null)
-            _jointSystem.RemoveJoint(dockA.DockJoint);
+        if (dock.Comp.DockJoint != null)
+            _jointSystem.RemoveJoint(dock.Comp.DockJoint);
 
-        var dockBUid = dockA.DockedWith;
+        var dockBUid = dock.Comp.DockedWith;
 
         if (dockBUid == null ||
             !_dockingQuery.TryComp(dockBUid, out var dockB))
         {
             DebugTools.Assert(false);
-            Log.Error($"Tried to cleanup {dockAUid} but not docked?");
+            Log.Error($"Tried to cleanup {dock.Owner} but not docked?");
 
-            dockA.DockedWith = null;
+            dock.Comp.DockedWith = null;
             return;
         }
 
@@ -205,23 +206,23 @@ public sealed partial class DockingSystem : SharedDockingSystem
         dockB.DockJoint = null;
         dockB.DockJointId = null;
 
-        dockA.DockJoint = null;
-        dockA.DockedWith = null;
-        dockA.DockJointId = null;
+        dock.Comp.DockJoint = null;
+        dock.Comp.DockedWith = null;
+        dock.Comp.DockJointId = null;
 
         // If these grids are ever null then need to look at fixing ordering for unanchored events elsewhere.
-        var gridAUid = Transform(dockAUid).GridUid;
+        var gridAUid = Transform(dock.Owner).GridUid;
         var gridBUid = Transform(dockBUid.Value).GridUid;
 
         var msg = new UndockEvent
         {
-            DockA = dockA,
+            DockA = dock.Comp,
             DockB = dockB,
             GridAUid = gridAUid!.Value,
             GridBUid = gridBUid!.Value,
         };
 
-        RaiseLocalEvent(dockAUid, msg);
+        RaiseLocalEvent(dock, msg);
         RaiseLocalEvent(dockBUid.Value, msg);
         RaiseLocalEvent(msg);
     }
@@ -354,7 +355,7 @@ public sealed partial class DockingSystem : SharedDockingSystem
 
         OnUndock(dock.Owner);
         OnUndock(dock.Comp.DockedWith.Value);
-        Cleanup(dock.Owner, dock);
+        Cleanup(dock);
         _console.RefreshShuttleConsoles();
     }
 

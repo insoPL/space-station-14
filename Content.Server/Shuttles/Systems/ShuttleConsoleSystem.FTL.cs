@@ -10,29 +10,25 @@ namespace Content.Server.Shuttles.Systems;
 
 public sealed partial class ShuttleConsoleSystem
 {
-    private void InitializeFTL()
-    {
-        SubscribeLocalEvent<FTLBeaconComponent, ComponentStartup>(OnBeaconStartup);
-        SubscribeLocalEvent<FTLBeaconComponent, AnchorStateChangedEvent>(OnBeaconAnchorChanged);
-
-        SubscribeLocalEvent<FTLExclusionComponent, ComponentStartup>(OnExclusionStartup);
-    }
-
+    [SubscribeLocalEvent]
     private void OnExclusionStartup(Entity<FTLExclusionComponent> ent, ref ComponentStartup args)
     {
         RefreshShuttleConsoles();
     }
 
+    [SubscribeLocalEvent]
     private void OnBeaconStartup(Entity<FTLBeaconComponent> ent, ref ComponentStartup args)
     {
         RefreshShuttleConsoles();
     }
 
-    private void OnBeaconAnchorChanged(Entity<FTLBeaconComponent> ent, ref AnchorStateChangedEvent args)
+    [SubscribeLocalEvent]
+    private void OnBeaconAnchorChanged(Entity<FTLBeaconComponent> _, ref AnchorStateChangedEvent args)
     {
         RefreshShuttleConsoles();
     }
 
+    [SubscribeLocalEvent]
     private void OnBeaconFTLMessage(Entity<ShuttleConsoleComponent> ent, ref ShuttleConsoleFTLBeaconMessage args)
     {
         var beaconEnt = GetEntity(args.Beacon);
@@ -59,7 +55,8 @@ public sealed partial class ShuttleConsoleSystem
         ConsoleFTL(ent, targetCoordinates, angle, targetXform.MapID);
     }
 
-    private void OnPositionFTLMessage(Entity<ShuttleConsoleComponent> entity, ref ShuttleConsoleFTLPositionMessage args)
+    [SubscribeLocalEvent]
+    private void OnPositionFTLMessage(Entity<ShuttleConsoleComponent> ent, ref ShuttleConsoleFTLPositionMessage args)
     {
         var mapUid = _mapSystem.GetMap(args.Coordinates.MapId);
 
@@ -71,7 +68,7 @@ public sealed partial class ShuttleConsoleSystem
 
         var targetCoordinates = new EntityCoordinates(mapUid, args.Coordinates.Position);
         var angle = args.Angle.Reduced();
-        ConsoleFTL(entity, targetCoordinates, angle, args.Coordinates.MapId);
+        ConsoleFTL(ent, targetCoordinates, angle, args.Coordinates.MapId);
     }
 
     private void GetBeacons(ref List<ShuttleBeaconObject>? beacons)

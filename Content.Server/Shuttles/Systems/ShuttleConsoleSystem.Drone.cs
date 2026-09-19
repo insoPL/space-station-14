@@ -1,5 +1,5 @@
-using Content.Server.Shuttles.Components;
 using Content.Server.Shuttles.Events;
+using Content.Shared.Shuttles.Components;
 using Content.Shared.Station.Components;
 using Content.Shared.UserInterface;
 
@@ -22,33 +22,31 @@ public sealed partial class ShuttleConsoleSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnDronePilotConsoleOpen(EntityUid uid, DroneConsoleComponent component, AfterActivatableUIOpenEvent args)
+    private void OnDronePilotConsoleOpen(Entity<DroneConsoleComponent> ent, ref AfterActivatableUIOpenEvent args)
     {
-        component.Entity = GetShuttleConsole(uid);
-    }
-
-    private void OnDronePilotConsoleClose(EntityUid uid, DroneConsoleComponent component, BoundUIClosedEvent args)
-    {
-        // Only if last person closed UI.
-        if (!_ui.IsUiOpen(uid, args.UiKey))
-            component.Entity = null;
+        ent.Comp.Entity = GetShuttleConsole(ent);
     }
 
     [SubscribeLocalEvent]
-    private void OnCargoGetConsole(EntityUid uid, DroneConsoleComponent component, ref ConsoleShuttleEvent args)
+    private void OnDronePilotConsoleClose(Entity<DroneConsoleComponent> ent, ref BoundUIClosedEvent args)
     {
-        args.Console = GetShuttleConsole(uid, component);
+        // Only if last person closed UI.
+        if (!_ui.IsUiOpen(ent.Owner, args.UiKey))
+            ent.Comp.Entity = null;
+    }
+
+    [SubscribeLocalEvent]
+    private void OnCargoGetConsole(Entity<DroneConsoleComponent> ent, ref ConsoleShuttleEvent args)
+    {
+        args.Console = GetShuttleConsole(ent);
     }
 
     /// <summary>
     /// Gets the relevant shuttle console to proxy from the drone console.
     /// </summary>
-    private EntityUid? GetShuttleConsole(EntityUid uid, DroneConsoleComponent? component = null)
+    private EntityUid? GetShuttleConsole(Entity<DroneConsoleComponent> ent)
     {
-        if (!Resolve(uid, ref component))
-            return null;
-
-        var stationUid = _station.GetOwningStation(uid);
+        var stationUid = _station.GetOwningStation(ent);
 
         if (stationUid == null)
             return null;
@@ -65,7 +63,7 @@ public sealed partial class ShuttleConsoleSystem
                 continue;
             }
 
-            foreach (var compType in component.Components.Values)
+            foreach (var compType in ent.Comp.Components.Values)
             {
                 if (!HasComp(xform.GridUid, compType.Component.GetType()))
                     continue;
