@@ -7,7 +7,6 @@ using Content.Shared.Alert;
 using Content.Shared.Popups;
 using Content.Shared.Shuttles.BUIStates;
 using Content.Shared.Shuttles.Components;
-using Content.Shared.Shuttles.Events;
 using Content.Shared.Shuttles.Systems;
 using Content.Shared.Tag;
 using Content.Shared.Movement.Systems;
@@ -282,9 +281,9 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnConsoleShutdown(EntityUid uid, ShuttleConsoleComponent component, ref ComponentShutdown args)
+    private void OnConsoleShutdown(Entity<ShuttleConsoleComponent> ent, ref ComponentShutdown args)
     {
-        ClearPilots(component);
+        ClearPilots(ent.Comp);
     }
 
     public void AddPilot(Entity<ShuttleConsoleComponent> ent, EntityUid entity)
