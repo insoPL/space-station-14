@@ -41,13 +41,13 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     private static readonly ProtoId<TagPrototype> CanPilotTag = "CanPilot";
 
     [SubscribeLocalEvent]
-    private void OnFtlDestStartup(EntityUid uid, FTLDestinationComponent component, ComponentStartup args)
+    private void OnFtlDestStartup(Entity<FTLDestinationComponent> ent, ref ComponentStartup args)
     {
         RefreshShuttleConsoles();
     }
 
     [SubscribeLocalEvent]
-    private void OnFtlDestShutdown(EntityUid uid, FTLDestinationComponent component, ComponentShutdown args)
+    private void OnFtlDestShutdown(Entity<FTLDestinationComponent> ent, ref ComponentShutdown args)
     {
         RefreshShuttleConsoles();
     }
@@ -103,7 +103,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     /// </summary>
     ///
     [SubscribeLocalEvent]
-    private void OnConsoleUIClose(Entity<ShuttleConsoleComponent> _, ref BoundUIClosedEvent args)
+    private void OnConsoleUIClose(Entity<ShuttleConsoleComponent> ent, ref BoundUIClosedEvent args)
     {
         if ((ShuttleConsoleUiKey)args.UiKey != ShuttleConsoleUiKey.Key)
         {
@@ -114,34 +114,31 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnConsoleUIOpenAttempt(EntityUid uid, ShuttleConsoleComponent component,
-        AfterActivatableUIOpenEvent args)
+    private void OnConsoleUIOpenAttempt(Entity<ShuttleConsoleComponent> ent, ref AfterActivatableUIOpenEvent args)
     {
-        TryPilot(args.User, uid);
+        TryPilot(args.User, ent);
     }
 
     [SubscribeLocalEvent]
-    private void OnConsoleAnchorChange(EntityUid uid, ShuttleConsoleComponent component,
-        ref AnchorStateChangedEvent args)
+    private void OnConsoleAnchorChange(Entity<ShuttleConsoleComponent> ent, ref AnchorStateChangedEvent args)
     {
         DockingInterfaceState? dockState = null;
-        UpdateState(uid, ref dockState);
+        UpdateState(ent, ref dockState);
     }
 
     [SubscribeLocalEvent]
-    private void OnConsolePowerChange(EntityUid uid, ShuttleConsoleComponent component, ref PowerChangedEvent args)
+    private void OnConsolePowerChange(Entity<ShuttleConsoleComponent> ent, ref PowerChangedEvent args)
     {
         DockingInterfaceState? dockState = null;
-        UpdateState(uid, ref dockState);
+        UpdateState(ent, ref dockState);
     }
 
-    private bool TryPilot(EntityUid user, EntityUid uid)
+    private bool TryPilot(EntityUid user, Entity<ShuttleConsoleComponent> ent)
     {
         if (!_tags.HasTag(user, CanPilotTag) ||
-            !TryComp<ShuttleConsoleComponent>(uid, out var component) ||
-            !this.IsPowered(uid, EntityManager) ||
-            !Transform(uid).Anchored ||
-            !_blocker.CanInteract(user, uid))
+            !this.IsPowered(ent, EntityManager) ||
+            !Transform(ent).Anchored ||
+            !_blocker.CanInteract(user, ent))
         {
             return false;
         }
@@ -154,18 +151,18 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
             RemovePilot(user, pilotComponent);
 
             // This feels backwards; is this intended to be a toggle?
-            if (console == uid)
+            if (console == ent)
                 return false;
         }
 
-        AddPilot(uid, user, component);
+        AddPilot(ent, user, ent.Comp);
         return true;
     }
 
     [SubscribeLocalEvent]
-    private void OnGetState(EntityUid uid, PilotComponent component, ref ComponentGetState args)
+    private void OnGetState(Entity<PilotComponent> ent, ref ComponentGetState args)
     {
-        args.State = new PilotComponentState(GetNetEntity(component.Console));
+        args.State = new PilotComponentState(GetNetEntity(ent.Comp.Console));
     }
 
     [SubscribeLocalEvent]
@@ -279,10 +276,10 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     }
 
 
-    protected override void HandlePilotShutdown(EntityUid uid, PilotComponent component, ComponentShutdown args)
+    protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
     {
-        base.HandlePilotShutdown(uid, component, args);
-        RemovePilot(uid, component);
+        base.HandlePilotShutdown(ent, args);
+        RemovePilot(ent, ent.Comp);
     }
 
     [SubscribeLocalEvent]

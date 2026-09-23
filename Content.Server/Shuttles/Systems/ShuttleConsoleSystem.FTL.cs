@@ -23,7 +23,7 @@ public sealed partial class ShuttleConsoleSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnBeaconAnchorChanged(Entity<FTLBeaconComponent> _, ref AnchorStateChangedEvent args)
+    private void OnBeaconAnchorChanged(Entity<FTLBeaconComponent> ent, ref AnchorStateChangedEvent args)
     {
         RefreshShuttleConsoles();
     }

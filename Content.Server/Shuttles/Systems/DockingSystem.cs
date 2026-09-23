@@ -116,7 +116,7 @@ public sealed partial class DockingSystem : SharedDockingSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnRequestUndock(Entity<ShuttleConsoleComponent> _, ref UndockRequestMessage args)
+    private void OnRequestUndock(Entity<ShuttleConsoleComponent> ent, ref UndockRequestMessage args)
     {
         if (!TryGetEntity(args.DockEntity, out var dockEnt) ||
             !_dockingQuery.TryComp(dockEnt, out var dockComp))

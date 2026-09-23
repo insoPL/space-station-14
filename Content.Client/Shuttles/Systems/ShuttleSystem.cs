@@ -9,7 +9,6 @@ public sealed partial class ShuttleSystem
     public override void Initialize()
     {
         base.Initialize();
-        InitializeEmergency();
         _overlays.AddOverlay(new FtlArrivalOverlay());
     }
 

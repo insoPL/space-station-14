@@ -1,52 +1,42 @@
 using Content.Shared.ActionBlocker;
 using Content.Shared.Movement.Events;
-using Content.Shared.Shuttles.BUIStates;
 using Content.Shared.Shuttles.Components;
 using Robust.Shared.Serialization;
 
-namespace Content.Shared.Shuttles.Systems
+namespace Content.Shared.Shuttles.Systems;
+
+public abstract partial class SharedShuttleConsoleSystem : EntitySystem
 {
-    public abstract partial class SharedShuttleConsoleSystem : EntitySystem
+    [Dependency] protected ActionBlockerSystem ActionBlockerSystem = default!;
+
+    [Serializable, NetSerializable]
+    protected sealed class PilotComponentState : ComponentState
     {
-        [Dependency] protected ActionBlockerSystem ActionBlockerSystem = default!;
+        public NetEntity? Console { get; }
 
-        public override void Initialize()
+        public PilotComponentState(NetEntity? uid)
         {
-            base.Initialize();
-            SubscribeLocalEvent<PilotComponent, UpdateCanMoveEvent>(HandleMovementBlock);
-            SubscribeLocalEvent<PilotComponent, ComponentStartup>(OnStartup);
-            SubscribeLocalEvent<PilotComponent, ComponentShutdown>(HandlePilotShutdown);
+            Console = uid;
         }
+    }
 
-        [Serializable, NetSerializable]
-        protected sealed class PilotComponentState : ComponentState
-        {
-            public NetEntity? Console { get; }
+    protected virtual void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
+    {
+        ActionBlockerSystem.UpdateCanMove(ent);
+    }
 
-            public PilotComponentState(NetEntity? uid)
-            {
-                Console = uid;
-            }
-        }
+    private void OnStartup(Entity<PilotComponent> ent, ComponentStartup args)
+    {
+        ActionBlockerSystem.UpdateCanMove(ent);
+    }
 
-        protected virtual void HandlePilotShutdown(EntityUid uid, PilotComponent component, ComponentShutdown args)
-        {
-            ActionBlockerSystem.UpdateCanMove(uid);
-        }
+    private void HandleMovementBlock(Entity<PilotComponent> ent, UpdateCanMoveEvent args)
+    {
+        if (ent.Comp.LifeStage> ComponentLifeStage.Running)
+            return;
+        if (ent.Comp.Console == null)
+            return;
 
-        private void OnStartup(EntityUid uid, PilotComponent component, ComponentStartup args)
-        {
-            ActionBlockerSystem.UpdateCanMove(uid);
-        }
-
-        private void HandleMovementBlock(EntityUid uid, PilotComponent component, UpdateCanMoveEvent args)
-        {
-            if (component.LifeStage > ComponentLifeStage.Running)
-                return;
-            if (component.Console == null)
-                return;
-
-            args.Cancel();
-        }
+        args.Cancel();
     }
 }

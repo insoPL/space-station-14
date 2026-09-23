@@ -15,7 +15,6 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     public override void Initialize()
     {
         base.Initialize();
-        SubscribeLocalEvent<PilotComponent, ComponentHandleState>(OnHandleState);
         var shuttle = _input.Contexts.New("shuttle", "common");
         shuttle.AddFunction(ContentKeyFunctions.ShuttleStrafeUp);
         shuttle.AddFunction(ContentKeyFunctions.ShuttleStrafeDown);
@@ -32,23 +31,24 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         _input.Contexts.Remove("shuttle");
     }
 
-    protected override void HandlePilotShutdown(EntityUid uid, PilotComponent component, ComponentShutdown args)
+    protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
     {
-        base.HandlePilotShutdown(uid, component, args);
-        if (_playerManager.LocalEntity != uid) return;
+        base.HandlePilotShutdown(ent, args);
+        if (_playerManager.LocalEntity != ent) return;
 
         _input.Contexts.SetActiveContext("human");
     }
 
-    private void OnHandleState(EntityUid uid, PilotComponent component, ref ComponentHandleState args)
+    [SubscribeLocalEvent]
+    private void OnHandleState(Entity<PilotComponent> ent, ref ComponentHandleState args)
     {
         if (args.Current is not PilotComponentState state) return;
 
-        var console = EnsureEntity<PilotComponent>(state.Console, uid);
+        var console = EnsureEntity<PilotComponent>(state.Console, ent);
 
         if (console == null)
         {
-            component.Console = null;
+            ent.Comp.Console = null;
             _input.Contexts.SetActiveContext("human");
             return;
         }
@@ -59,8 +59,8 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
             return;
         }
 
-        component.Console = console;
-        ActionBlockerSystem.UpdateCanMove(uid);
+        ent.Comp.Console = console;
+        ActionBlockerSystem.UpdateCanMove(ent);
         _input.Contexts.SetActiveContext("shuttle");
     }
 }
