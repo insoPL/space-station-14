@@ -155,7 +155,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
                 return false;
         }
 
-        AddPilot(ent, user, ent.Comp);
+        AddPilot(ent, user);
         return true;
     }
 
@@ -275,7 +275,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         }
     }
 
-
+    [SubscribeLocalEvent]
     protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
     {
         base.HandlePilotShutdown(ent, args);
@@ -288,21 +288,21 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         ClearPilots(component);
     }
 
-    public void AddPilot(EntityUid uid, EntityUid entity, ShuttleConsoleComponent component)
+    public void AddPilot(Entity<ShuttleConsoleComponent> ent, EntityUid entity)
     {
         if (!TryComp(entity, out PilotComponent? pilotComponent)
-        || component.SubscribedPilots.Contains(entity))
+        || ent.Comp.SubscribedPilots.Contains(entity))
         {
             return;
         }
 
-        _eyeSystem.SetZoom(entity, component.Zoom, ignoreLimits: true);
+        _eyeSystem.SetZoom(entity, ent.Comp.Zoom, ignoreLimits: true);
 
-        component.SubscribedPilots.Add(entity);
+        ent.Comp.SubscribedPilots.Add(entity);
 
         _alertsSystem.ShowAlert(entity, pilotComponent.PilotingAlert);
 
-        pilotComponent.Console = uid;
+        pilotComponent.Console = ent;
         ActionBlockerSystem.UpdateCanMove(entity);
         pilotComponent.Position = Transform(entity).Coordinates;
         Dirty(entity, pilotComponent);

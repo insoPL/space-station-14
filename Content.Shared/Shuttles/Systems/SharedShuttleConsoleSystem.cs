@@ -25,11 +25,13 @@ public abstract partial class SharedShuttleConsoleSystem : EntitySystem
         ActionBlockerSystem.UpdateCanMove(ent);
     }
 
+    [SubscribeLocalEvent]
     private void OnStartup(Entity<PilotComponent> ent, ComponentStartup args)
     {
         ActionBlockerSystem.UpdateCanMove(ent);
     }
 
+    [SubscribeLocalEvent]
     private void HandleMovementBlock(Entity<PilotComponent> ent, UpdateCanMoveEvent args)
     {
         if (ent.Comp.LifeStage> ComponentLifeStage.Running)
