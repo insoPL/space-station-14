@@ -31,9 +31,9 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         _input.Contexts.Remove("shuttle");
     }
 
-    protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
+    protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ref ComponentShutdown args)
     {
-        base.HandlePilotShutdown(ent, args);
+        base.HandlePilotShutdown(ent, ref args);
         if (_playerManager.LocalEntity != ent) return;
 
         _input.Contexts.SetActiveContext("human");

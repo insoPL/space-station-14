@@ -20,21 +20,22 @@ public abstract partial class SharedShuttleConsoleSystem : EntitySystem
         }
     }
 
-    protected virtual void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
+    [SubscribeLocalEvent]
+    protected virtual void HandlePilotShutdown(Entity<PilotComponent> ent, ref ComponentShutdown args)
     {
         ActionBlockerSystem.UpdateCanMove(ent);
     }
 
     [SubscribeLocalEvent]
-    private void OnStartup(Entity<PilotComponent> ent, ComponentStartup args)
+    private void OnStartup(Entity<PilotComponent> ent, ref ComponentStartup args)
     {
         ActionBlockerSystem.UpdateCanMove(ent);
     }
 
     [SubscribeLocalEvent]
-    private void HandleMovementBlock(Entity<PilotComponent> ent, UpdateCanMoveEvent args)
+    private void HandleMovementBlock(Entity<PilotComponent> ent, ref UpdateCanMoveEvent args)
     {
-        if (ent.Comp.LifeStage> ComponentLifeStage.Running)
+        if (ent.Comp.LifeStage > ComponentLifeStage.Running)
             return;
         if (ent.Comp.Console == null)
             return;

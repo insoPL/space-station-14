@@ -275,15 +275,14 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
         }
     }
 
-    [SubscribeLocalEvent]
-    protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ComponentShutdown args)
+    protected override void HandlePilotShutdown(Entity<PilotComponent> ent, ref ComponentShutdown args)
     {
-        base.HandlePilotShutdown(ent, args);
+        base.HandlePilotShutdown(ent, ref args);
         RemovePilot(ent, ent.Comp);
     }
 
     [SubscribeLocalEvent]
-    private void OnConsoleShutdown(EntityUid uid, ShuttleConsoleComponent component, ComponentShutdown args)
+    private void OnConsoleShutdown(EntityUid uid, ShuttleConsoleComponent component, ref ComponentShutdown args)
     {
         ClearPilots(component);
     }
