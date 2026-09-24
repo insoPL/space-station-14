@@ -3,7 +3,6 @@ using Content.Shared.Shuttles.Components;
 using Content.Shared.Shuttles.Systems;
 using Robust.Client.Input;
 using Robust.Client.Player;
-using Robust.Shared.GameStates;
 
 namespace Content.Client.Shuttles.Systems;
 
@@ -40,15 +39,12 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
     }
 
     [SubscribeLocalEvent]
-    private void OnHandleState(Entity<PilotComponent> ent, ref ComponentHandleState args)
+    private void OnAfterHandleState(Entity<PilotComponent> ent, ref AfterAutoHandleStateEvent args)
     {
-        if (args.Current is not PilotComponentState state) return;
-
-        var console = EnsureEntity<PilotComponent>(state.Console, ent);
+        var console = ent.Comp.Console;
 
         if (console == null)
         {
-            ent.Comp.Console = null;
             _input.Contexts.SetActiveContext("human");
             return;
         }
@@ -59,7 +55,6 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
             return;
         }
 
-        ent.Comp.Console = console;
         ActionBlockerSystem.UpdateCanMove(ent);
         _input.Contexts.SetActiveContext("shuttle");
     }

@@ -15,7 +15,6 @@ using Content.Shared.Shuttles.UI.MapObjects;
 using Content.Shared.Timing;
 using Robust.Server.GameObjects;
 using Robust.Shared.Collections;
-using Robust.Shared.GameStates;
 using Robust.Shared.Map;
 using Robust.Shared.Utility;
 using Content.Shared.UserInterface;
@@ -156,12 +155,6 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
 
         AddPilot(ent, user);
         return true;
-    }
-
-    [SubscribeLocalEvent]
-    private void OnGetState(Entity<PilotComponent> ent, ref ComponentGetState args)
-    {
-        args.State = new PilotComponentState(GetNetEntity(ent.Comp.Console));
     }
 
     [SubscribeLocalEvent]
@@ -326,6 +319,7 @@ public sealed partial class ShuttleConsoleSystem : SharedShuttleConsoleSystem
 
         if (pilotComponent.LifeStage < ComponentLifeStage.Stopping)
             RemComp<PilotComponent>(pilotUid);
+        Dirty(pilotUid, pilotComponent);
     }
 
     public void RemovePilot(EntityUid entity)

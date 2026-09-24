@@ -6,39 +6,37 @@ using Robust.Shared.Map;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
-namespace Content.Shared.Shuttles.Components
+namespace Content.Shared.Shuttles.Components;
+
+/// <summary>
+/// Stores what shuttle this entity is currently piloting.
+/// </summary>
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
+public sealed partial class PilotComponent : Component
 {
+    [ViewVariables, AutoNetworkedField]
+    public EntityUid? Console { get; set; }
+
     /// <summary>
-    /// Stores what shuttle this entity is currently piloting.
+    /// Where we started piloting from to check if we should break from moving too far.
     /// </summary>
-    [RegisterComponent]
-    [NetworkedComponent]
-    public sealed partial class PilotComponent : Component
-    {
-        [ViewVariables]
-        public EntityUid? Console { get; set; }
+    [ViewVariables]
+    public EntityCoordinates? Position { get; set; }
 
-        /// <summary>
-        /// Where we started piloting from to check if we should break from moving too far.
-        /// </summary>
-        [ViewVariables]
-        public EntityCoordinates? Position { get; set; }
+    public Vector2 CurTickStrafeMovement = Vector2.Zero;
+    public float CurTickRotationMovement;
+    public float CurTickBraking;
 
-        public Vector2 CurTickStrafeMovement = Vector2.Zero;
-        public float CurTickRotationMovement;
-        public float CurTickBraking;
+    public GameTick LastInputTick = GameTick.Zero;
+    public ushort LastInputSubTick = 0;
 
-        public GameTick LastInputTick = GameTick.Zero;
-        public ushort LastInputSubTick = 0;
+    [ViewVariables]
+    public ShuttleButtons HeldButtons = ShuttleButtons.None;
 
-        [ViewVariables]
-        public ShuttleButtons HeldButtons = ShuttleButtons.None;
+    [DataField]
+    public ProtoId<AlertPrototype> PilotingAlert = "PilotingShuttle";
 
-        [DataField]
-        public ProtoId<AlertPrototype> PilotingAlert = "PilotingShuttle";
-
-        public override bool SendOnlyToOwner => true;
-    }
-
-    public sealed partial class StopPilotingAlertEvent : BaseAlertEvent;
+    public override bool SendOnlyToOwner => true;
 }
+
+public sealed partial class StopPilotingAlertEvent : BaseAlertEvent;
