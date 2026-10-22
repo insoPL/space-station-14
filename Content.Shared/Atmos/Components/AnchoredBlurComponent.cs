@@ -1,0 +1,24 @@
+using System.Numerics;
+using Robust.Shared.GameStates;
+
+namespace Content.Shared.Atmos.Components;
+
+/// <summary>
+/// Adds a heat blur distortion effect anchored to an entity.
+/// </summary>
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
+public sealed partial class AnchoredBlurComponent : Component
+{
+    /// <summary>
+    /// Size of the heat blur distortion area in meters.
+    /// </summary>
+    [DataField, AutoNetworkedField, ViewVariables(VVAccess.ReadWrite)]
+    public Vector2 Size = new(0.5f, 0.5f);
+
+    /// <summary>
+    /// Strength of the heat blur distortion effect (0 to 1).
+    /// </summary>
+    [DataField, AutoNetworkedField, ViewVariables(VVAccess.ReadWrite)]
+    public float Strength = 1f;
+}
+

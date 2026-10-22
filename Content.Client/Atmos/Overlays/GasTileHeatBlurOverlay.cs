@@ -12,6 +12,7 @@ using Robust.Shared.Enums;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
+using System.Numerics;
 using Color = Robust.Shared.Maths.Color;
 using Texture = Robust.Client.Graphics.Texture;
 
@@ -27,7 +28,6 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
     private static readonly ProtoId<ShaderPrototype> HeatOverlayShader = "HeatBlur";
 
     private static readonly Color EmptyColor = new(0, 0, 0, 0);
-    private static readonly Color MarkerColor = new(255f, 0, 0);
 
     [Dependency] private IEntityManager _entManager = default!;
     [Dependency] private IPrototypeManager _proto = default!;
@@ -90,6 +90,7 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
         var res = _resources.GetForViewport(args.Viewport, static _ => new CachedResources());
 
         var target = args.Viewport.RenderTarget;
+        var viewport = args.Viewport;
 
         // Probably the resolution of the game window changed, remake the textures.
         if (res.HeatTarget?.Texture.Size != target.Size)
@@ -160,8 +161,7 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
 
                             anyDistortion = true;
 
-                            // Encode the strength in the red channel
-                            // alpha set to 1 as tile is active
+                            // Encode the shader strength in the red channel.ie draw red circle on heated tile
                             worldHandle.DrawTextureRect(
                                 _heatGradientTexture,
                                 Box2.CenteredAround(tilePosition + grid.Comp.TileSizeHalfVector,
@@ -170,6 +170,27 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
                         }
                     }
                 }
+
+                worldHandle.SetTransform(worldToViewportLocal);
+                var blurQuery = _entManager.EntityQueryEnumerator<AnchoredBlurComponent, TransformComponent>();
+                while (blurQuery.MoveNext(out var uid, out var blur, out var xform))
+                {
+                    var (worldPos, worldRot) = _xformSys.GetWorldPositionRotation(xform);
+
+                    if (!worldBounds.Contains(worldPos))
+                        continue;
+
+                    anyDistortion = true;
+
+                    var finalPos = worldPos + new Vector2(0f, 0.5f);
+
+                    worldHandle.DrawTextureRect(
+                        _heatGradientTexture,
+                        Box2.CenteredAround(finalPos, blur.Size * ShaderSpilling),
+                        new Color(blur.Strength, 0f, 0f)
+                    );
+                }
+
             },
             // This clears the buffer to all zero first...
             EmptyColor);
@@ -193,7 +214,8 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
         _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
         _shader.SetParameter("NOISE_TEXTURE", _noiseTexture);
 
-        args.WorldHandle.UseShader(_shader);
+        // DEBUG pro tip, comment out this shader line to make the heat texture visible.
+        //args.WorldHandle.UseShader(_shader);
         args.WorldHandle.DrawTextureRect(res.HeatTarget.Texture, args.WorldBounds);
     }
 
