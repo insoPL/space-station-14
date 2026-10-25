@@ -16,6 +16,12 @@ public sealed partial class AnchoredBlurComponent : Component
     public Vector2 Size = new(0.5f, 0.5f);
 
     /// <summary>
+    /// Size of the heat blur distortion area in meters.
+    /// </summary>
+    [DataField, AutoNetworkedField, ViewVariables(VVAccess.ReadWrite)]
+    public Vector2 Offset = new(0f, 0f);
+
+    /// <summary>
     /// Strength of the heat blur distortion effect (0 to 1).
     /// </summary>
     [DataField, AutoNetworkedField, ViewVariables(VVAccess.ReadWrite)]

@@ -66,3 +66,6 @@
         enum.SolutionHeaterVisuals.IsOn:
           True: { visible: true }
           False: { visible: false }
+  - type: AnchoredBlur    
+    offset: 0, -0.2
+    size: 0.4, 0.4

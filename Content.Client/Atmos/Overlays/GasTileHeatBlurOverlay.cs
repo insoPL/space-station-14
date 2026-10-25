@@ -5,6 +5,7 @@ using Content.Shared.Atmos;
 using Content.Shared.Atmos.Components;
 using Content.Shared.Atmos.EntitySystems;
 using Content.Shared.CCVar;
+using Content.Shared.RCD;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Shared.Configuration;
@@ -34,6 +35,7 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
     [Dependency] private IClyde _clyde = default!;
     [Dependency] private IConfigurationManager _configManager = default!;
     [Dependency] private IResourceCache _resourceCache = default!;
+    [Dependency] private readonly IEyeManager _eyeManager = default!;
 
     private readonly SharedMapSystem _maps;
     private readonly SharedTransformSystem _xformSys;
@@ -172,6 +174,9 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
                 }
 
                 worldHandle.SetTransform(worldToViewportLocal);
+                var direction = _eyeManager.CurrentEye.Rotation.GetCardinalDir();
+                var multi = (direction == Direction.East || direction == Direction.West) ? -1f : 1f;
+
                 var blurQuery = _entManager.EntityQueryEnumerator<AnchoredBlurComponent, TransformComponent>();
                 while (blurQuery.MoveNext(out var uid, out var blur, out var xform))
                 {
@@ -181,12 +186,16 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
                         continue;
 
                     anyDistortion = true;
+                    var baseOffset = blur.Offset;
 
-                    var finalPos = worldPos + new Vector2(0f, 0.5f);
+                    baseOffset *= multi;
+                    baseOffset = direction.ToAngle().RotateVec(baseOffset);
+
+                    var rotatedOffset = worldRot.RotateVec(baseOffset);
 
                     worldHandle.DrawTextureRect(
                         _heatGradientTexture,
-                        Box2.CenteredAround(finalPos, blur.Size * ShaderSpilling),
+                        Box2.CenteredAround(worldPos + rotatedOffset, blur.Size * ShaderSpilling),
                         new Color(blur.Strength, 0f, 0f)
                     );
                 }
@@ -203,6 +212,7 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
 
         return true;
     }
+
 
     protected override void Draw(in OverlayDrawArgs args)
     {
