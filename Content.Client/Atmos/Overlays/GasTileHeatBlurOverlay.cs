@@ -174,28 +174,32 @@ public sealed partial class GasTileHeatBlurOverlay : Overlay
                 }
 
                 worldHandle.SetTransform(worldToViewportLocal);
-                var direction = _eyeManager.CurrentEye.Rotation.GetCardinalDir();
-                var multi = (direction == Direction.East || direction == Direction.West) ? -1f : 1f;
+                var eyerot = _eyeManager.CurrentEye.Rotation;
 
                 var blurQuery = _entManager.EntityQueryEnumerator<AnchoredBlurComponent, TransformComponent>();
-                while (blurQuery.MoveNext(out var uid, out var blur, out var xform))
+                while (blurQuery.MoveNext(out _, out var blur, out var xform))
                 {
+                    if (xform.MapID != mapId)
+                        continue;
+
                     var (worldPos, worldRot) = _xformSys.GetWorldPositionRotation(xform);
 
                     if (!worldBounds.Contains(worldPos))
                         continue;
 
+                    var cardinalAngle = (eyerot + worldRot + MathHelper.PiOver2).RoundToCardinalAngle();
+                    var cardinalDir = cardinalAngle.GetCardinalDir();
+                    var flipMultiplier = cardinalDir is Direction.North or Direction.South ? -1f : 1f;
+
+                    var adjustedRot = cardinalAngle + worldRot;
+                    var rotatedOffset = adjustedRot.RotateVec(blur.Offset * flipMultiplier);
+                    var drawBox = Box2.CenteredAround(worldPos + rotatedOffset, blur.Size * ShaderSpilling);
+
                     anyDistortion = true;
-                    var baseOffset = blur.Offset;
-
-                    baseOffset *= multi;
-                    baseOffset = direction.ToAngle().RotateVec(baseOffset);
-
-                    var rotatedOffset = worldRot.RotateVec(baseOffset);
 
                     worldHandle.DrawTextureRect(
                         _heatGradientTexture,
-                        Box2.CenteredAround(worldPos + rotatedOffset, blur.Size * ShaderSpilling),
+                        drawBox,
                         new Color(blur.Strength, 0f, 0f)
                     );
                 }
