@@ -1,4 +1,5 @@
 using Content.Shared.Atmos.Piping.Portable.Components;
+using Content.Shared.Atmos.Piping.Unary.Components;
 using JetBrains.Annotations;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
@@ -6,7 +7,7 @@ using Robust.Client.UserInterface.Controls;
 namespace Content.Client.Atmos.UI;
 
 /// <summary>
-///     Initializes a <see cref="SpaceHeaterWindow"/> and updates it when new server messages are received.
+/// Initializes a <see cref="SpaceHeaterWindow"/> and updates it when new server messages are received.
 /// </summary>
 [UsedImplicitly]
 public sealed class SpaceHeaterBoundUserInterface : BoundUserInterface
@@ -30,54 +31,48 @@ public sealed class SpaceHeaterBoundUserInterface : BoundUserInterface
         _window.ModeSelector.OnItemSelected += OnModeChanged;
 
         _window.PowerLevelSelector.OnItemSelected += OnPowerLevelChange;
+
+        Update();
     }
 
     private void OnToggleStatusButtonPressed()
     {
-        SendMessage(new SpaceHeaterToggleMessage());
+        SendPredictedMessage(new SpaceHeaterToggleMessage());
     }
 
     private void OnTemperatureRangeChanged(float changeAmount)
     {
-        SendMessage(new SpaceHeaterChangeTemperatureMessage(changeAmount));
+        SendPredictedMessage(new SpaceHeaterChangeTemperatureMessage(changeAmount));
     }
 
     private void OnModeChanged(OptionButton.ItemSelectedEventArgs args)
     {
         _window?.ModeSelector.SelectId(args.Id);
-        SendMessage(new SpaceHeaterChangeModeMessage((SpaceHeaterMode)args.Id));
+        SendPredictedMessage(new SpaceHeaterChangeModeMessage((SpaceHeaterMode)args.Id));
     }
 
     private void OnPowerLevelChange(RadioOptionItemSelectedEventArgs<int> args)
     {
         _window?.PowerLevelSelector.Select(args.Id);
-        SendMessage(new SpaceHeaterChangePowerLevelMessage((SpaceHeaterPowerLevel)args.Id));
+        SendPredictedMessage(new SpaceHeaterChangePowerLevelMessage((SpaceHeaterPowerLevel)args.Id));
     }
 
-    /// <summary>
-    ///     Update the UI state based on server-sent info
-    /// </summary>
-    /// <param name="state"></param>
-    protected override void UpdateState(BoundUserInterfaceState state)
+    public override void Update()
     {
-        base.UpdateState(state);
-        if (_window == null || state is not SpaceHeaterBoundUserInterfaceState cast)
+        base.Update();
+
+        if (_window == null
+            || !EntMan.TryGetComponent(Owner, out GasThermoMachineComponent? comp))
             return;
 
-        _window.SetActive(cast.Enabled);
-        _window.ModeSelector.SelectId((int)cast.Mode);
-        _window.PowerLevelSelector.Select((int)cast.PowerLevel);
-
-        _window.MinTemp = cast.MinTemperature;
-        _window.MaxTemp = cast.MaxTemperature;
-        _window.SetTemperature(cast.TargetTemperature);
+        _window.SetTemperature(comp.TargetTemperature, comp.MinTemperature, comp.MaxTemperature);
     }
 
     protected override void Dispose(bool disposing)
     {
-        base.Dispose(disposing);
-        if (!disposing)
+        Close();
+        if (_window == null)
             return;
-        _window?.Dispose();
+        _window.Close();
     }
 }
