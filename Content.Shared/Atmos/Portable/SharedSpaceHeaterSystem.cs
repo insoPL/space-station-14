@@ -55,7 +55,7 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
     [SubscribeLocalEvent]
     private void OnToggle(Entity<SpaceHeaterComponent> ent, ref SpaceHeaterToggleMessage args)
     {
-        var togg = _receiver.TogglePower(ent);
+        ent.Comp.Active = _receiver.TogglePower(ent);
 
         UpdateAppearance(ent);
         Dirty(ent);

@@ -11,7 +11,7 @@ public sealed partial class SpaceHeaterComponent : Component
     /// Current mode the space heater is in. Possible values : Auto, Heat and Cool
     /// </summary>
     [DataField, AutoNetworkedField, ViewVariables(VVAccess.ReadWrite)]
-    public bool Enabled = true;
+    public bool Active = false;
 
     /// <summary>
     /// Current mode the space heater is in. Possible values : Auto, Heat and Cool

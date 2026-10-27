@@ -62,10 +62,15 @@ public sealed class SpaceHeaterBoundUserInterface : BoundUserInterface
         base.Update();
 
         if (_window == null
-            || !EntMan.TryGetComponent(Owner, out GasThermoMachineComponent? comp))
+            || !EntMan.TryGetComponent(Owner, out GasThermoMachineComponent? gasThermoMachine)
+            || !EntMan.TryGetComponent(Owner, out SpaceHeaterComponent? spaceHeaterComp))
             return;
 
-        _window.SetTemperature(comp.TargetTemperature, comp.MinTemperature, comp.MaxTemperature);
+        _window.ToggleStatusButton.Pressed = spaceHeaterComp.Active;
+        _window.ModeSelector.SelectId((int)spaceHeaterComp.Mode);
+        _window.PowerLevelSelector.Select((int)spaceHeaterComp.PowerLevel);
+
+        _window.SetTemperature(gasThermoMachine.TargetTemperature, gasThermoMachine.MinTemperature, gasThermoMachine.MaxTemperature);
     }
 
     protected override void Dispose(bool disposing)
