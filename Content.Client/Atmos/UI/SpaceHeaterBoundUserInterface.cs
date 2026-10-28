@@ -55,7 +55,7 @@ public sealed class SpaceHeaterBoundUserInterface : BoundUserInterface
         _window.ModeSelector.SelectId((int)spaceHeaterComp.Mode);
         _window.PowerLevelSelector.Select((int)spaceHeaterComp.PowerLevel);
 
-        _window.SetTemperature(gasThermoMachine.TargetTemperature, gasThermoMachine.MinTemperature, gasThermoMachine.MaxTemperature);
+        _window.SetTemperature(gasThermoMachine.TargetTemperature, spaceHeaterComp.MinTemperature, spaceHeaterComp.MaxTemperature);
     }
 
     protected override void Dispose(bool disposing)
