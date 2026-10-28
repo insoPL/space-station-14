@@ -8,11 +8,12 @@ namespace Content.Server.Atmos.Portable;
 public sealed partial class SpaceHeaterSystem : EntitySystem
 {
     [Dependency] private AtmosphereSystem _atmosphereSystem = default!;
+    [Dependency] private EntityQuery<GasThermoMachineComponent> _thermoQuery = default!;
 
     [SubscribeLocalEvent]
     private void OnDeviceUpdated(Entity<SpaceHeaterComponent> ent, ref AtmosDeviceUpdateEvent args)
     {
-        if (!TryComp<GasThermoMachineComponent>(ent, out var thermoMachine))
+        if (!_thermoQuery.TryComp(ent, out var thermoMachine))
         {
             return;
         }

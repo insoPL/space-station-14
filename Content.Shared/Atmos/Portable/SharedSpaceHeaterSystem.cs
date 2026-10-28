@@ -13,8 +13,8 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
     [Dependency] private SharedPowerReceiverSystem _receiver = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
-    [Dependency] private EntityQuery<GasThermoMachineComponent> _thermoQuery = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
+    [Dependency] private EntityQuery<GasThermoMachineComponent> _thermoQuery = default!;
 
     [SubscribeLocalEvent]
     private void OnInit(Entity<SpaceHeaterComponent> ent, ref MapInitEvent args)
