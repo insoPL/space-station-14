@@ -24,23 +24,43 @@ public sealed class SpaceHeaterBoundUserInterface : BoundUserInterface
 
         _window = this.CreateWindow<SpaceHeaterWindow>();
 
-        _window.ToggleStatusButton.OnToggled += _ =>
-            SendPredictedMessage(new SpaceHeaterToggleMessage());
+        // Bind events to our new wrapper methods
+        _window.ToggleStatusButton.OnToggled += _ => ToggleStatus();
 
-        _window.IncreaseTempRange.OnPressed += _ =>
-            SendPredictedMessage(new SpaceHeaterChangeTemperatureMessage(_window.TemperatureChangeDelta));
+        _window.IncreaseTempRange.OnPressed += _ => ChangeTemperature(_window.TemperatureChangeDelta);
+        _window.DecreaseTempRange.OnPressed += _ => ChangeTemperature(-_window.TemperatureChangeDelta);
 
-        _window.DecreaseTempRange.OnPressed += _ =>
-            SendPredictedMessage(new SpaceHeaterChangeTemperatureMessage(-_window.TemperatureChangeDelta));
+        _window.ModeSelector.OnItemSelected += args => ChangeMode((SpaceHeaterMode)args.Id);
+        _window.PowerLevelSelector.OnItemSelected += args => ChangePowerLevel((SpaceHeaterPowerLevel)args.Id);
 
-        _window.ModeSelector.OnItemSelected += args =>
-            SendPredictedMessage(new SpaceHeaterChangeModeMessage((SpaceHeaterMode)args.Id));
-
-        _window.PowerLevelSelector.OnItemSelected += args =>
-            SendPredictedMessage(new SpaceHeaterChangePowerLevelMessage((SpaceHeaterPowerLevel)args.Id));
-
+        // Initial UI populate
         Update();
     }
+
+    private void ToggleStatus()
+    {
+        SendPredictedMessage(new SpaceHeaterToggleMessage());
+        Update();
+    }
+
+    private void ChangeTemperature(float delta)
+    {
+        SendPredictedMessage(new SpaceHeaterChangeTemperatureMessage(delta));
+        Update();
+    }
+
+    private void ChangeMode(SpaceHeaterMode mode)
+    {
+        SendPredictedMessage(new SpaceHeaterChangeModeMessage(mode));
+        Update();
+    }
+
+    private void ChangePowerLevel(SpaceHeaterPowerLevel level)
+    {
+        SendPredictedMessage(new SpaceHeaterChangePowerLevelMessage(level));
+        Update();
+    }
+
 
     public override void Update()
     {

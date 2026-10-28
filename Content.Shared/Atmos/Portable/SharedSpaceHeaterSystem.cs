@@ -8,12 +8,11 @@ using Content.Shared.UserInterface;
 
 namespace Content.Shared.Atmos.Portable;
 
-public sealed partial class SharedSpaceHeaterSystem : EntitySystem
+public abstract partial class SharedSpaceHeaterSystem : EntitySystem
 {
     [Dependency] private SharedPowerReceiverSystem _receiver = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
-    [Dependency] private SharedUserInterfaceSystem _ui = default!;
     [Dependency] private EntityQuery<GasThermoMachineComponent> _thermoQuery = default!;
 
     [SubscribeLocalEvent]
@@ -24,13 +23,6 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
 
         thermoMachine.Cp = ent.Comp.HeatingCp;
         thermoMachine.HeatCapacity = ent.Comp.PowerConsumption;
-        Dirty(ent, thermoMachine);
-    }
-
-    [SubscribeLocalEvent]
-    private void OnBeforeOpened(Entity<SpaceHeaterComponent> ent, ref BeforeActivatableUIOpenEvent args)
-    {
-        Dirty(ent);
     }
 
     [SubscribeLocalEvent]
@@ -48,16 +40,20 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
     [SubscribeLocalEvent]
     private void OnPowerChanged(Entity<SpaceHeaterComponent> ent, ref PowerChangedEvent args)
     {
-        UpdateAppearance(ent);
-        Dirty(ent);
+        if (ent.Comp.Active)
+            UpdateAppearance(ent);
     }
 
     [SubscribeLocalEvent]
     private void OnToggle(Entity<SpaceHeaterComponent> ent, ref SpaceHeaterToggleMessage args)
     {
         ent.Comp.Active = _receiver.TogglePower(ent, user: args.Actor);
-        UpdateAppearance(ent);
         Dirty(ent);
+
+        if (!ent.Comp.Active)
+            SetOff(ent);
+        else
+            UpdateAppearance(ent);
     }
 
     [SubscribeLocalEvent]
@@ -70,11 +66,8 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
                                                       ent.Comp.MinTemperature,
                                                       ent.Comp.MaxTemperature);
 
-        UpdateAppearance(ent);
         Dirty(ent, thermoMachine);
-
-        if (_ui.TryGetOpenUi(ent.Owner, SpaceHeaterUiKey.Key, out var bui))
-            bui.Update();
+        UpdateAppearance(ent, thermoMachine);
     }
 
     [SubscribeLocalEvent]
@@ -90,20 +83,17 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
             thermoMachine.Cp = ent.Comp.HeatingCp;
         else if (ent.Comp.Mode == SpaceHeaterMode.Cool)
             thermoMachine.Cp = ent.Comp.CoolingCp;
-        Dirty(ent, thermoMachine);
-
-        if (_ui.TryGetOpenUi(ent.Owner, SpaceHeaterUiKey.Key, out var bui))
-            bui.Update();
+        SetOff(ent); // Set appearance to off until the Server can figure out if it's actually running or not
     }
 
     [SubscribeLocalEvent]
     private void OnPowerLevelChanged(Entity<SpaceHeaterComponent> ent, ref SpaceHeaterChangePowerLevelMessage args)
     {
-        if (!_thermoQuery.TryComp(ent, out var thermoMachine))
-            return;
-
         ent.Comp.PowerLevel = args.PowerLevel;
         Dirty(ent);
+
+        if (!_thermoQuery.TryComp(ent, out var thermoMachine))
+            return;
 
         switch (ent.Comp.PowerLevel)
         {
@@ -119,30 +109,45 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
                 thermoMachine.HeatCapacity = ent.Comp.PowerConsumption * 2;
                 break;
         }
-
-        Dirty(ent, thermoMachine);
-
-        if (_ui.TryGetOpenUi(ent.Owner, SpaceHeaterUiKey.Key, out var bui))
-            bui.Update();
     }
 
-    private void UpdateAppearance(EntityUid uid)
+    protected void UpdateAppearance(EntityUid uid, GasThermoMachineComponent? thermoMachine = null)
     {
-        if (!_receiver.IsPowered(uid) || !_thermoQuery.TryComp(uid, out var thermoMachine))
+        if (!_receiver.IsPowered(uid) || !Resolve(uid, ref thermoMachine, false))
         {
-            _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.Off);
+            SetOff(uid);
         }
         else if (thermoMachine.LastEnergyDelta > 0)
         {
-            _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.Heating);
+            SetHeating(uid);
         }
         else if (thermoMachine.LastEnergyDelta < 0)
         {
-            _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.Cooling);
+            SetCooling(uid);
         }
         else
         {
-            _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.StandBy);
+            SetStandBy(uid);
         }
+    }
+
+    protected void SetOff(EntityUid uid)
+    {
+        _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.Off);
+    }
+
+    protected void SetStandBy(EntityUid uid)
+    {
+        _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.StandBy);
+    }
+
+    protected void SetHeating(EntityUid uid)
+    {
+        _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.Heating);
+    }
+
+    protected void SetCooling(EntityUid uid)
+    {
+        _appearance.SetData(uid, SpaceHeaterVisuals.State, SpaceHeaterState.Cooling);
     }
 }
