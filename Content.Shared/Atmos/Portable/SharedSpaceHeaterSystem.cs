@@ -5,6 +5,8 @@ using Content.Shared.Popups;
 using Content.Shared.Power;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.UserInterface;
+using Robust.Shared.Audio;
+using Robust.Shared.Audio.Systems;
 
 namespace Content.Shared.Atmos.Portable;
 
@@ -15,6 +17,7 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private EntityQuery<GasThermoMachineComponent> _thermoQuery = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
+    [Dependency] private SharedAudioSystem _audio = default!;
 
     [SubscribeLocalEvent]
     private void OnInit(Entity<SpaceHeaterComponent> ent, ref MapInitEvent args)
@@ -55,8 +58,7 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
     [SubscribeLocalEvent]
     private void OnToggle(Entity<SpaceHeaterComponent> ent, ref SpaceHeaterToggleMessage args)
     {
-        ent.Comp.Active = _receiver.TogglePower(ent);
-
+        ent.Comp.Active = _receiver.TogglePower(ent, user: args.Actor);
         UpdateAppearance(ent);
         Dirty(ent);
     }
@@ -85,13 +87,16 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
             return;
 
         ent.Comp.Mode = args.Mode;
+        Dirty(ent);
 
         if (ent.Comp.Mode == SpaceHeaterMode.Heat)
             thermoMachine.Cp = ent.Comp.HeatingCp;
         else if (ent.Comp.Mode == SpaceHeaterMode.Cool)
             thermoMachine.Cp = ent.Comp.CoolingCp;
+        Dirty(ent, thermoMachine);
 
-        Dirty(ent);
+        if (_ui.TryGetOpenUi(ent.Owner, SpaceHeaterUiKey.Key, out var bui))
+            bui.Update();
     }
 
     [SubscribeLocalEvent]
@@ -101,6 +106,7 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
             return;
 
         ent.Comp.PowerLevel = args.PowerLevel;
+        Dirty(ent);
 
         switch (ent.Comp.PowerLevel)
         {
@@ -117,7 +123,10 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
                 break;
         }
 
-        Dirty(ent);
+        Dirty(ent, thermoMachine);
+
+        if (_ui.TryGetOpenUi(ent.Owner, SpaceHeaterUiKey.Key, out var bui))
+            bui.Update();
     }
 
     private void UpdateAppearance(EntityUid uid)
