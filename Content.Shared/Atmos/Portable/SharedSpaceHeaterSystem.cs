@@ -5,8 +5,6 @@ using Content.Shared.Popups;
 using Content.Shared.Power;
 using Content.Shared.Power.EntitySystems;
 using Content.Shared.UserInterface;
-using Robust.Shared.Audio;
-using Robust.Shared.Audio.Systems;
 
 namespace Content.Shared.Atmos.Portable;
 
@@ -17,7 +15,6 @@ public sealed partial class SharedSpaceHeaterSystem : EntitySystem
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private EntityQuery<GasThermoMachineComponent> _thermoQuery = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
-    [Dependency] private SharedAudioSystem _audio = default!;
 
     [SubscribeLocalEvent]
     private void OnInit(Entity<SpaceHeaterComponent> ent, ref MapInitEvent args)
