@@ -40,8 +40,6 @@ public abstract partial class SharedSpaceHeaterSystem : EntitySystem
     [SubscribeLocalEvent]
     private void OnPowerChanged(Entity<SpaceHeaterComponent> ent, ref PowerChangedEvent args)
     {
-        if (ent.Comp.Active)
-            UpdateAppearance(ent);
     }
 
     [SubscribeLocalEvent]
@@ -52,8 +50,6 @@ public abstract partial class SharedSpaceHeaterSystem : EntitySystem
 
         if (!ent.Comp.Active)
             SetOff(ent);
-        else
-            UpdateAppearance(ent);
     }
 
     [SubscribeLocalEvent]
@@ -67,7 +63,6 @@ public abstract partial class SharedSpaceHeaterSystem : EntitySystem
                                                       ent.Comp.MaxTemperature);
 
         Dirty(ent, thermoMachine);
-        UpdateAppearance(ent, thermoMachine);
     }
 
     [SubscribeLocalEvent]
