@@ -51,12 +51,10 @@ public sealed partial class SpaceHeaterSystem : SharedSpaceHeaterSystem
         }
         else if (environment.Temperature <= thermoMachine.TargetTemperature - tolerance)
         {
-            thermoMachine.Cp = ent.Comp.HeatingCp;
             SetHeating(ent);
         }
         else if (environment.Temperature >= thermoMachine.TargetTemperature + tolerance)
         {
-            thermoMachine.Cp = ent.Comp.CoolingCp;
             SetCooling(ent);
         }
     }
