@@ -8,7 +8,7 @@ using Robust.Client.UserInterface.XAML;
 namespace Content.Client.Atmos.UI;
 
 /// <summary>
-///     Client-side UI used to control a space heater.
+/// Client-side UI used to control a space heater.
 /// </summary>
 [GenerateTypedNameReferences]
 public sealed partial class SpaceHeaterWindow : FancyWindow

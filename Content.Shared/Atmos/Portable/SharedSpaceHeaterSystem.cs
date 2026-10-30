@@ -38,11 +38,6 @@ public abstract partial class SharedSpaceHeaterSystem : EntitySystem
     }
 
     [SubscribeLocalEvent]
-    private void OnPowerChanged(Entity<SpaceHeaterComponent> ent, ref PowerChangedEvent args)
-    {
-    }
-
-    [SubscribeLocalEvent]
     private void OnToggle(Entity<SpaceHeaterComponent> ent, ref SpaceHeaterToggleMessage args)
     {
         ent.Comp.Active = _receiver.TogglePower(ent, user: args.Actor);
@@ -78,7 +73,7 @@ public abstract partial class SharedSpaceHeaterSystem : EntitySystem
             thermoMachine.Cp = ent.Comp.HeatingCp;
         else if (ent.Comp.Mode == SpaceHeaterMode.Cool)
             thermoMachine.Cp = ent.Comp.CoolingCp;
-        SetOff(ent); // Set appearance to off until the Server can figure out if it's actually running or not
+        SetStandBy(ent); // Set appearance to stand by until the server can figure out if it's actually running or not
     }
 
     [SubscribeLocalEvent]

@@ -23,17 +23,12 @@ public sealed class SpaceHeaterBoundUserInterface : BoundUserInterface
         base.Open();
 
         _window = this.CreateWindow<SpaceHeaterWindow>();
-
-        // Bind events to our new wrapper methods
         _window.ToggleStatusButton.OnToggled += _ => ToggleStatus();
-
         _window.IncreaseTempRange.OnPressed += _ => ChangeTemperature(_window.TemperatureChangeDelta);
         _window.DecreaseTempRange.OnPressed += _ => ChangeTemperature(-_window.TemperatureChangeDelta);
-
         _window.ModeSelector.OnItemSelected += args => ChangeMode((SpaceHeaterMode)args.Id);
         _window.PowerLevelSelector.OnItemSelected += args => ChangePowerLevel((SpaceHeaterPowerLevel)args.Id);
 
-        // Initial UI populate
         Update();
     }
 

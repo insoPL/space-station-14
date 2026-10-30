@@ -6,6 +6,11 @@ using Content.Shared.Atmos.Portable;
 
 namespace Content.Server.Atmos.Portable;
 
+/// <summary>
+/// Server side implementation of space heater.
+/// When space heater is auto mode it uses atmos data to flip it between cooling and heating mode.
+/// If you are searching for actual atmos logic it's handled by <seealso cref="GasThermoMachineSystem"/>
+/// </summary>
 public sealed partial class SpaceHeaterSystem : SharedSpaceHeaterSystem
 {
     [Dependency] private AtmosphereSystem _atmosphereSystem = default!;
