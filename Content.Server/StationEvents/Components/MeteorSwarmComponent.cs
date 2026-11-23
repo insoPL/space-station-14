@@ -1,4 +1,5 @@
 using Content.Server.StationEvents.Events;
+using Content.Shared.Audio;
 using Content.Shared.Destructible.Thresholds;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
@@ -45,6 +46,7 @@ public sealed partial class MeteorSwarmComponent : Component
     public LocId? Announcement = "station-event-meteor-swarm-start-announcement";
 
     [DataField]
+    [AllowStereo]
     public SoundSpecifier? AnnouncementSound = new SoundPathSpecifier("/Audio/Announcements/meteors.ogg")
     {
         Params = new()

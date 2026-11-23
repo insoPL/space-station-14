@@ -12,6 +12,10 @@ using System.Numerics;
 
 namespace Content.Server.StationEvents.Events;
 
+/// <summary>
+/// Handler for events that spawn meteors, throwing them at the largest grid of the station.
+/// </summary>
+/// <seealso cref="MeteorSwarmComponent"/>
 public sealed partial class MeteorSwarmSystem : GameRuleSystem<MeteorSwarmComponent>
 {
     [Dependency] private SharedPhysicsSystem _physics = default!;
@@ -83,7 +87,7 @@ public sealed partial class MeteorSwarmSystem : GameRuleSystem<MeteorSwarmCompon
             var subOffsetAngle = RobustRandom.Prob(0.5f)
                 ? angle + Math.PI / 2
                 : angle - Math.PI / 2;
-            var subOffset = subOffsetAngle.RotateVec(new Vector2( (playableArea.TopRight - playableArea.Center).Length() / 3 * RobustRandom.NextFloat(), 0));
+            var subOffset = subOffsetAngle.RotateVec(new Vector2((playableArea.TopRight - playableArea.Center).Length() / 3 * RobustRandom.NextFloat(), 0));
 
             var spawnPosition = new MapCoordinates(center + offset + subOffset, mapId);
             var meteor = Spawn(spawnProto, spawnPosition, rotation: subOffsetAngle);
@@ -94,7 +98,7 @@ public sealed partial class MeteorSwarmSystem : GameRuleSystem<MeteorSwarmCompon
         component.WaveCounter--;
         if (component.WaveCounter <= 0)
         {
-            ForceEndSelf(uid, gameRule);
+            ForceEndSelf((uid, gameRule));
         }
     }
 }
