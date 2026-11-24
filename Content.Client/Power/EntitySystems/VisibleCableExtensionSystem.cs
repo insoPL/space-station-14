@@ -7,6 +7,9 @@ using System.Numerics;
 
 namespace Content.Client.Power.VisibleCableExtension;
 
+//TODO it's a bad aproach to make this clientside
+// just make it shared, PVS is hell
+
 /// <summary>
 /// Spawns a client-side visual line between an <see cref="ExtensionCableReceiverComponent"/>
 /// and its connected <see cref="ExtensionCableReceiverComponent.Provider"/>.
@@ -15,16 +18,18 @@ public sealed partial class VisibleCableExtensionSystem : EntitySystem
 {
     private static readonly EntProtoId ExtensionLVProtoId = "VisibleCableExtensionLV";
 
-    [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SpriteSystem _sprite = default!;
-    [Dependency] private SharedMapSystem _map = default!;
-    [Dependency] private SubFloorHideSystem _subFloor = default!;
-
     [Dependency] private EntityQuery<TransformComponent> _xformQuery = default!;
     [Dependency] private EntityQuery<SpriteComponent> _spriteQuery = default!;
 
     [SubscribeLocalEvent]
     private void OnAfterAutoHandleState(Entity<ExtensionCableReceiverComponent> ent, ref AfterAutoHandleStateEvent args)
+    {
+        UpdateCable(ent);
+    }
+
+    [SubscribeLocalEvent]
+    private void OnAnchorStateChangedEvent(Entity<ExtensionCableReceiverComponent> ent, ref AnchorStateChangedEvent args)
     {
         UpdateCable(ent);
     }
@@ -46,6 +51,9 @@ public sealed partial class VisibleCableExtensionSystem : EntitySystem
             return;
 
         if (receiverXform.GridUid is not { } gridUid || gridUid != providerXform.GridUid)
+            return;
+
+        if (!receiverXform.Anchored)
             return;
 
         var diff = receiverXform.LocalPosition - providerXform.LocalPosition;
