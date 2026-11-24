@@ -263,3 +263,19 @@
   - type: Tag
     tags:
     - ExCable
+
+- type: entity
+  id: VisibleCableExtensionLV
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: Structures/Power/Cables/extension_cable.rsi
+    state: ext_cable
+    color: Green
+    drawdepth: ThinWire
+  - type: Appearance
+    netsync: false
+  - type: SubFloorHide
+  - type: Visibility
+    layer: 1
